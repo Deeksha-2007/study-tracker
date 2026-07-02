@@ -1,0 +1,3069 @@
+
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Time Tracker & Productivity Dashboard</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          borderRadius: {
+            '3xl': '24px',
+            '4xl': '32px',
+          },
+          fontFamily: {
+            sans: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & Chart.js -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;500;600;700&family=Inter:wght=300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* Aesthetic Design Theme Variable Injectors */
+    :root {
+      --primary: 139, 92, 246; /* Lavender Purple */
+      --primary-rgb: 139, 92, 246;
+      --primary-light: 245, 243, 255;
+      --bg-gradient-start: #faf9fe;
+      --bg-gradient-end: #f3f0fc;
+      --card-bg: #ffffff;
+      --text-main: #1e1b4b;
+      --text-muted: #6b7280;
+      --card-border: rgba(243, 244, 246, 1);
+      --shadow-soft: 0 10px 30px -5px rgba(139, 92, 246, 0.05), 0 4px 12px -2px rgba(139, 92, 246, 0.03);
+    }
+
+    .theme-sakura {
+      --primary: 236, 72, 153; /* Pastel Pink */
+      --primary-rgb: 236, 72, 153;
+      --primary-light: 253, 242, 248;
+      --bg-gradient-start: #fffafb;
+      --bg-gradient-end: #fdf2f4;
+      --card-bg: #ffffff;
+      --text-main: #500724;
+      --text-muted: #854d62;
+      --card-border: rgba(251, 242, 245, 1);
+      --shadow-soft: 0 10px 30px -5px rgba(236, 72, 153, 0.05), 0 4px 12px -2px rgba(236, 72, 153, 0.03);
+    }
+
+    .theme-matcha {
+      --primary: 16, 185, 129; /* Tea Green */
+      --primary-rgb: 16, 185, 129;
+      --primary-light: 240, 253, 250;
+      --bg-gradient-start: #fbfdfa;
+      --bg-gradient-end: #f0f7f4;
+      --card-bg: #ffffff;
+      --text-main: #022c22;
+      --text-muted: #4b6b61;
+      --card-border: rgba(240, 240, 244, 1);
+      --shadow-soft: 0 10px 30px -5px rgba(16, 185, 129, 0.05), 0 4px 12px -2px rgba(16, 185, 129, 0.03);
+    }
+
+    .theme-peach {
+      --primary: 249, 115, 22; /* Soft Peach Orange */
+      --primary-rgb: 249, 115, 22;
+      --primary-light: 255, 247, 237;
+      --bg-gradient-start: #fffbfa;
+      --bg-gradient-end: #faf0eb;
+      --card-bg: #ffffff;
+      --text-main: #431407;
+      --text-muted: #7c5246;
+      --card-border: rgba(254, 243, 238, 1);
+      --shadow-soft: 0 10px 30px -5px rgba(249, 115, 22, 0.05), 0 4px 12px -2px rgba(249, 115, 22, 0.03);
+    }
+
+    .theme-dark {
+      --primary: 168, 85, 247; /* Neon Violet */
+      --primary-rgb: 168, 85, 247;
+      --primary-light: 30, 27, 75;
+      --bg-gradient-start: #0f172a;
+      --bg-gradient-end: #020617;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-border: #334155;
+      --shadow-soft: 0 10px 30px -5px rgba(0, 0, 0, 0.5), 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+      color: var(--text-main);
+      transition: all 0.3s ease;
+    }
+
+    .custom-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-soft);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .custom-card:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Dark Theme Cascading Selectors Overrides */
+    .theme-dark body {
+      background: linear-gradient(135deg, #0f172a 0%, #020617 100%) !important;
+      color: #f8fafc !important;
+    }
+    .theme-dark aside, 
+    .theme-dark header, 
+    .theme-dark .bg-white,
+    .theme-dark .custom-card,
+    .theme-dark #modal-manual-log > div,
+    .theme-dark #modal-subject > div,
+    .theme-dark #modal-task > div,
+    .theme-dark #onboarding-modal > div,
+    .theme-dark #confirm-dialog > div {
+      background-color: #1e293b !important;
+      color: #f8fafc !important;
+      border-color: #334155 !important;
+    }
+    .theme-dark .text-gray-900,
+    .theme-dark .text-gray-800,
+    .theme-dark .text-gray-750,
+    .theme-dark .text-gray-700,
+    .theme-dark .text-gray-600 {
+      color: #f8fafc !important;
+    }
+    .theme-dark .text-gray-400,
+    .theme-dark .text-gray-500 {
+      color: #94a3b8 !important;
+    }
+    .theme-dark .bg-gray-50,
+    .theme-dark .bg-gray-100,
+    .theme-dark .bg-gray-100\/50,
+    .theme-dark .bg-slate-50\/50,
+    .theme-dark .bg-purple-50\/20 {
+      background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+    .theme-dark select,
+    .theme-dark input,
+    .theme-dark textarea {
+      background-color: #0f172a !important;
+      color: #f8fafc !important;
+      border-color: #334155 !important;
+    }
+    .theme-dark .border-gray-100,
+    .theme-dark .border-gray-50 {
+      border-color: #334155 !important;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(var(--primary), 0.2);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(var(--primary), 0.4);
+    }
+
+    /* Active Tab Highlights */
+    .tab-active {
+      background-color: var(--primary-light);
+      color: rgb(var(--primary));
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="h-full font-sans antialiased overflow-hidden selection:bg-purple-200">
+
+  <!-- Network Async Spinner Loader -->
+  <div id="loading-spinner" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-[100] hidden">
+    <div class="bg-white rounded-3xl p-5 flex items-center space-x-3.5 shadow-2xl border border-gray-100">
+      <svg class="animate-spin h-6 w-6 text-violet-600" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span class="text-xs font-semibold text-gray-750">Syncing with database...</span>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+  <!-- Custom Confirmation Dialog -->
+  <div id="confirm-dialog" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full mx-4 shadow-xl space-y-4 border border-gray-100">
+      <div class="flex items-start space-x-3">
+        <div class="p-2 bg-amber-50 text-amber-500 rounded-xl" id="confirm-icon-container">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-gray-900" id="confirm-title">Confirm Action</h3>
+          <p class="text-xs text-gray-400 mt-1" id="confirm-message">Are you sure you want to perform this action?</p>
+        </div>
+      </div>
+      <div class="flex space-x-2 pt-2">
+        <button id="confirm-cancel-btn" class="flex-1 py-2.5 border border-gray-100 text-gray-500 font-semibold text-xs rounded-xl hover:bg-gray-50 transition">Cancel</button>
+        <button id="confirm-ok-btn" class="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs rounded-xl transition">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Context-Sensitive Tutorial Overlay -->
+  <div id="tutorial-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 hidden transition-all duration-300">
+    <div id="tutorial-card" class="absolute bg-white rounded-3xl p-6 shadow-2xl max-w-sm w-full border border-gray-100 space-y-4 pointer-events-auto transition-all duration-300">
+      <div class="flex justify-between items-center">
+        <span class="text-[10px] bg-violet-100 text-violet-700 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider" id="tutorial-steps-indicator">Step 1 of 2</span>
+        <button onclick="skipTutorial()" class="text-xs text-gray-400 hover:text-gray-600 font-medium">Skip</button>
+      </div>
+      <div>
+        <h4 class="text-sm font-bold text-gray-900" id="tutorial-title">Title</h4>
+        <p class="text-xs text-gray-400 mt-1" id="tutorial-desc">Description details go here.</p>
+      </div>
+      <div class="flex justify-between items-center pt-2">
+        <button onclick="prevTutorialStep()" id="tutorial-prev-btn" class="px-3 py-1.5 text-xs font-semibold text-gray-500 border border-gray-100 rounded-xl hover:bg-gray-50">Back</button>
+        <button onclick="nextTutorialStep()" id="tutorial-next-btn" class="px-4 py-1.5 text-xs font-semibold text-white bg-violet-600 rounded-xl hover:bg-violet-700">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Onboarding Flow Modal Wizard -->
+  <div id="onboarding-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-3xl p-8 max-w-lg w-full mx-4 shadow-2xl space-y-6 border border-gray-150 transition-all duration-300">
+      
+      <!-- Wizard Progress Indicators -->
+      <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <span class="text-xs font-bold text-violet-600 uppercase tracking-wider" id="onboard-step-title">Profile setup</span>
+        <div class="flex space-x-1.5" id="onboard-progress-dots">
+          <span class="w-2 h-2 rounded-full bg-violet-600 transition" id="dot-1"></span>
+          <span class="w-2 h-2 rounded-full bg-gray-200 transition" id="dot-2"></span>
+          <span class="w-2 h-2 rounded-full bg-gray-200 transition" id="dot-3"></span>
+          <span class="w-2 h-2 rounded-full bg-gray-200 transition" id="dot-4"></span>
+          <span class="w-2 h-2 rounded-full bg-gray-200 transition" id="dot-5"></span>
+        </div>
+      </div>
+
+      <!-- STEP 1: User Profile Name -->
+      <div id="onboard-step-1" class="space-y-4">
+        <div class="text-center space-y-2">
+          <div class="w-16 h-16 bg-violet-100 text-violet-600 rounded-2xl flex items-center justify-center mx-auto text-3xl">🎓</div>
+          <h3 class="text-lg font-bold text-gray-900">Welcome to Study Tracker</h3>
+          <p class="text-xs text-gray-400 px-4">Let's craft your custom academic dashboard. What name should we call you during focus periods?</p>
+        </div>
+        <div class="space-y-1">
+          <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Your Name</label>
+          <input type="text" id="wizard-name-input" placeholder="e.g. xyz" class="w-full border border-gray-150 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+        </div>
+      </div>
+
+      <!-- STEP 2: First Subject Color Palette expanded to 10 aesthetic options -->
+      <div id="onboard-step-2" class="space-y-4 hidden">
+        <div class="text-center space-y-2">
+          <div class="w-16 h-16 bg-pink-100 text-pink-600 rounded-2xl flex items-center justify-center mx-auto text-3xl">📚</div>
+          <h3 class="text-lg font-bold text-gray-900">Define Your First Subject</h3>
+          <p class="text-xs text-gray-400 px-4">Start organizing your tracking structure. Set up a core class, exam target, or course study area.</p>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Subject Name</label>
+            <input type="text" id="wizard-subject-input" placeholder="e.g. Physics" class="w-full border border-gray-150 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Accent Theme Color</label>
+            <div class="grid grid-cols-5 gap-2 pt-1">
+              <button onclick="selectWizardAccent('#A78BFA', this)" class="h-8 rounded-xl bg-[#A78BFA] border-2 border-transparent transition-all outline-none wizard-color-bubble ring-2 ring-violet-500" data-color="#A78BFA" title="Lavender"></button>
+              <button onclick="selectWizardAccent('#F472B6', this)" class="h-8 rounded-xl bg-[#F472B6] border-2 border-transparent transition-all outline-none wizard-color-bubble" data-color="#F472B6" title="Sakura Pink"></button>
+              <button onclick="selectWizardAccent('#FB923C', this)" class="h-8 rounded-xl bg-[#FB923C] border-2 border-transparent transition-all outline-none wizard-color-bubble" data-color="#FB923C" title="Peach Orange"></button>
+              <button onclick="selectWizardAccent('#34D399', this)" class="h-8 rounded-xl bg-[#34D399] border-2 border-transparent transition-all outline-none wizard-color-bubble" data-color="#34D399" title="Matcha Green"></button>
+              <button onclick="selectWizardAccent('#60A5FA', this)" class="h-8 rounded-xl bg-[#60A5FA] border-2 border-transparent transition-all outline-none wizard-color-bubble" data-color="#60A5FA" title="Sky Blue"></button>
+              <button onclick="selectWizardAccent('#2DD4BF', this)" class="h-8 rounded-xl bg-[#2DD4BF] border-2 border-transparent transition-all outline-none wizard-color-bubble" data-color="#2DD4BF" title="Mint"></button>
+              <button onclick="selectWizardAccent('#FACC15', this)" class="h-8 rounded-xl bg-[#FACC15] border-2 border-transparent transition-all outline-none wizard-color-bubble" data-color="#FACC15" title="Lemon Yellow"></button>
+              <button onclick="selectWizardAccent('#FB7185', this)" class="h-8 rounded-xl bg-[#FB7185] border-2 border-transparent transition-all outline-none wizard-color-bubble" data-color="#FB7185" title="Coral"></button>
+              <button onclick="selectWizardAccent('#818CF8', this)" class="h-8 rounded-xl bg-[#818CF8] border-2 border-transparent transition-all outline-none wizard-color-bubble" data-color="#818CF8" title="Periwinkle"></button>
+              <button onclick="selectWizardAccent('#22D3EE', this)" class="h-8 rounded-xl bg-[#22D3EE] border-2 border-transparent transition-all outline-none wizard-color-bubble" data-color="#22D3EE" title="Aqua"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: Subtopics Configuration -->
+      <div id="onboard-step-3" class="space-y-4 hidden">
+        <div class="text-center space-y-2">
+          <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mx-auto text-3xl">⚙️</div>
+          <h3 class="text-lg font-bold text-gray-900">Define Topic Hierarchies</h3>
+          <p class="text-xs text-gray-400 px-4">Divide your subject into tracked sub-topics to organize your focus blocks.</p>
+        </div>
+        <div class="space-y-1">
+          <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Sub-topics (Comma separated)</label>
+          <textarea id="wizard-topics-input" placeholder="e.g. Kinematics, Thermodynamics, Optics" rows="3" class="w-full border border-gray-150 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none"></textarea>
+        </div>
+      </div>
+
+      <!-- STEP 4: Weekly Study Goal Setting -->
+      <div id="onboard-step-4" class="space-y-4 hidden">
+        <div class="text-center space-y-2">
+          <div class="w-16 h-16 xbg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto text-3xl">🎯</div>
+          <h3 class="text-lg font-bold text-gray-900">Daily Target Allocation</h3>
+          <p class="text-xs text-gray-400 px-4">How many cumulative hours are you aiming to study every single week?</p>
+        </div>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between text-xs px-2">
+            <span class="font-bold text-gray-500">Daily Target</span>
+            <span class="text-base font-black text-violet-600" id="wizard-goal-display">4 Hours</span>
+          </div>
+          <input type="range" id="wizard-goal-input" min="1" max="24" value="4" oninput="document.getElementById('wizard-goal-display').innerText = this.value + ' Hours'" class="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-violet-600">
+        </div>
+      </div>
+
+      <!-- STEP 5: Success Summary Screen -->
+      <div id="onboard-step-5" class="space-y-4 hidden">
+        <div class="text-center space-y-2">
+          <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-2xl flex items-center justify-center mx-auto text-3xl">🌟</div>
+          <h3 class="text-lg font-bold text-gray-900">Your Dashboard is Ready!</h3>
+          <p class="text-xs text-gray-400 px-4">Let's review your configurations before starting your workspace tracker experience.</p>
+        </div>
+        <div class="bg-gray-50 rounded-2xl p-4 text-xs space-y-2.5 border border-gray-100" id="wizard-summary-card"></div>
+      </div>
+
+      <!-- Navigation Footer -->
+      <div class="flex space-x-2 pt-2 border-t border-gray-100">
+        <button onclick="prevOnboardingStep()" id="onboard-back-btn" class="flex-1 py-2.5 border border-gray-150 text-gray-500 font-semibold text-xs rounded-xl hover:bg-gray-50 transition hidden">Back</button>
+        <button onclick="nextOnboardingStep()" id="onboard-next-btn" class="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs rounded-xl transition">Next Step</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Main App Wrapper -->
+  <div class="h-full flex overflow-hidden">
+
+    <!-- ================== SIDEBAR (LEFT) ================== -->
+    <aside id="sidebar-panel" class="w-64 bg-white border-r border-gray-100 flex flex-col justify-between p-6 flex-shrink-0 hidden md:flex z-30 transition-all duration-300">
+      <div>
+        <!-- Logo Header -->
+        <div class="flex items-center justify-between mb-8">
+          <div class="flex items-center space-x-2">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white animate-pulse" style="background-color: rgb(var(--primary));">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            </div>
+            <div>
+              <h1 class="text-lg font-bold tracking-tight">Study Time</h1>
+              <p class="text-[10px] text-gray-400 font-semibold tracking-wider uppercase -mt-1">Tracker Hub</p>
+            </div>
+          </div>
+          <!-- Close button for mobile -->
+          <button onclick="toggleMobileSidebar()" class="md:hidden p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg">
+            ✕
+          </button>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="space-y-1">
+          <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition tab-active">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"></path></svg>
+            <span>Dashboard</span>
+          </button>
+          <button onclick="switchTab('subjects')" id="nav-subjects" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            <span>Subjects</span>
+          </button>
+          <button onclick="switchTab('tasks')" id="nav-tasks" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+            <span>Task Board</span>
+          </button>
+          <button onclick="switchTab('analytics')" id="nav-analytics" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            <span>Analytics</span>
+          </button>
+          <button onclick="switchTab('history')" id="nav-history" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>History</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Settings, Tutorial Link & Theme Switcher -->
+      <div class="space-y-4">
+        <div class="pt-4 border-t border-gray-100 flex flex-col space-y-3">
+          
+         <div class="space-y-1">
+            <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Your Profile Name</label>
+            <input type="text" id="settings-name-input" onchange="updateProfileName(this.value)" class="w-full border border-gray-100 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+          </div>
+
+          <button onclick="startAppTutorial()" class="w-full py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 font-semibold text-[10px] rounded-lg border border-slate-200 uppercase tracking-wider transition">
+            Help & Tutorial
+          </button>
+
+          <div class="flex items-center justify-between pt-2">
+            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Appearance</span>
+            <div class="flex space-x-1">
+              <button onclick="setTheme('lavender')" class="w-3.5 h-3.5 rounded-full bg-violet-500 border border-white outline-none" title="Lavender"></button>
+              <button onclick="setTheme('sakura')" class="w-3.5 h-3.5 rounded-full bg-pink-500 border border-white outline-none" title="Sakura"></button>
+              <button onclick="setTheme('matcha')" class="w-3.5 h-3.5 rounded-full bg-emerald-500 border border-white outline-none" title="Matcha"></button>
+              <button onclick="setTheme('peach')" class="w-3.5 h-3.5 rounded-full bg-orange-500 border border-white outline-none" title="Peach"></button>
+              <button onclick="setTheme('dark')" class="w-3.5 h-3.5 rounded-full bg-slate-800 border border-white outline-none" title="Dark Mode"></button>
+            </div>
+          </div>
+          
+          <div class="pt-2 text-center border-t border-gray-50">
+            <button onclick="wipeDataRestoreDefaults()" class="text-[10px] text-red-400 hover:text-red-600 transition font-bold uppercase tracking-wider">Wipe Database</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ================== MIDDLE WORKSPACE ================== -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden">
+      
+      <!-- Top Dynamic Header Bar -->
+      <header class="h-16 border-b border-gray-100 bg-white/70 backdrop-blur px-6 flex items-center justify-between flex-shrink-0 z-10">
+        <div class="flex items-center space-x-3">
+          <!-- Mobile menu toggle -->
+          <button onclick="toggleMobileSidebar()" class="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+          </button>
+          <div>
+            <h2 class="text-base font-bold" id="greeting-banner">Good evening! 🌙</h2>
+            <p class="text-xs text-gray-400">Let's make today productive and organized.</p>
+          </div>
+        </div>
+
+        <!-- Global Quick Actions -->
+        <div class="flex items-center space-x-4">
+          <div class="h-8 w-[1px] bg-gray-100"></div>
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs" id="user-avatar-char">S</div>
+            <span class="text-xs font-semibold text-gray-700 hidden sm:inline" id="header-user-welcome">Hello, Student</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scrollable Workspace Container -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+
+        <!-- ================== TAB: DASHBOARD ================== -->
+        <div id="tab-dashboard" class="space-y-6">
+          
+          <!-- Key Metrics Row -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <div class="custom-card rounded-3xl p-5 relative overflow-hidden" id="step-metrics">
+              <div class="flex justify-between items-start">
+                <div class="p-3 bg-purple-50 rounded-2xl text-purple-500">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+              </div>
+              <p class="text-[11px] text-gray-400 font-bold uppercase tracking-wider mt-4">Today's Study Time</p>
+              <h3 class="text-2xl font-black mt-1" id="stat-today">00h 00m</h3>
+              <div class="mt-2 h-6 flex items-end space-x-0.5">
+                <div class="bg-purple-200 h-1 w-full rounded-sm"></div>
+                <div class="bg-purple-200 h-1 w-full rounded-sm"></div>
+                <div class="bg-purple-300 h-1 w-full rounded-sm"></div>
+                <div class="bg-purple-400 h-1 w-full rounded-sm"></div>
+                <div class="bg-purple-500 h-1 w-full rounded-sm"></div>
+              </div>
+            </div>
+
+            <div class="custom-card rounded-3xl p-5 relative overflow-hidden">
+              <div class="flex justify-between items-start">
+                <div class="p-3 bg-pink-50 rounded-2xl text-pink-500">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+              </div>
+              <p class="text-[11px] text-gray-400 font-bold uppercase tracking-wider mt-4">This Week</p>
+              <h3 class="text-2xl font-black mt-1" id="stat-week">00h 00m</h3>
+              <div class="mt-2 h-6 flex items-end space-x-0.5">
+                <div class="bg-pink-200 h-1 w-full rounded-sm"></div>
+                <div class="bg-pink-300 h-1 w-full rounded-sm"></div>
+                <div class="bg-pink-400 h-1 w-full rounded-sm"></div>
+                <div class="bg-pink-200 h-1 w-full rounded-sm"></div>
+                <div class="bg-pink-500 h-1 w-full rounded-sm"></div>
+              </div>
+            </div>
+
+            <div class="custom-card rounded-3xl p-5 relative overflow-hidden">
+              <div class="flex justify-between items-start">
+                <div class="p-3 bg-orange-50 rounded-2xl text-orange-500">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+              </div>
+              <p class="text-[11px] text-gray-400 font-bold uppercase tracking-wider mt-4">Total Study Time</p>
+              <h3 class="text-2xl font-black mt-1" id="stat-total">00h 00m</h3>
+              <div class="mt-2 h-6 flex items-end space-x-0.5">
+                <div class="bg-orange-200 h-1 w-full rounded-sm"></div>
+                <div class="bg-orange-300 h-1 w-full rounded-sm"></div>
+                <div class="bg-orange-400 h-1 w-full rounded-sm"></div>
+                <div class="bg-orange-500 h-1 w-full rounded-sm"></div>
+                <div class="bg-orange-600 h-1 w-full rounded-sm"></div>
+              </div>
+            </div>
+
+            <div class="custom-card rounded-3xl p-5 relative overflow-hidden">
+              <div class="flex justify-between items-start">
+                <div class="p-3 bg-emerald-50 rounded-2xl text-emerald-500">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+              </div>
+              <p class="text-[11px] text-gray-400 font-bold uppercase tracking-wider mt-4">Current Streak</p>
+              <h3 class="text-2xl font-black mt-1" id="stat-streak">0 days</h3>
+              <div class="mt-2 h-6 flex items-end space-x-0.5">
+                <div class="bg-emerald-200 h-1 w-full rounded-sm"></div>
+                <div class="bg-emerald-200 h-1 w-full rounded-sm"></div>
+                <div class="bg-emerald-300 h-1 w-full rounded-sm"></div>
+                <div class="bg-emerald-400 h-1 w-full rounded-sm"></div>
+                <div class="bg-emerald-500 h-1 w-full rounded-sm"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Mid Section: Main Charts Layout -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Study time by subject chart (Donut) -->
+            <div class="custom-card rounded-3xl p-6 lg:col-span-1 flex flex-col justify-between" id="step-breakdown">
+              <div class="flex justify-between items-center mb-4">
+                <h4 class="text-sm font-bold text-gray-900">Study Breakdown</h4>
+                <span class="text-xs text-gray-400 font-medium">Subject-wise</span>
+              </div>
+              <div id="donut-chart-wrapper" class="relative w-full aspect-square max-w-[180px] mx-auto flex items-center justify-center">
+                <canvas id="chartSubjectBreakdown"></canvas>
+                <div id="donut-empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                  <span class="text-2xl">📊</span>
+                  <p class="text-[10px] text-gray-400 mt-1 font-medium">No recorded session data yet</p>
+                </div>
+              </div>
+              <!-- Legend List Container -->
+              <div class="mt-4 space-y-2 max-h-[140px] overflow-y-auto pr-1" id="donut-legend-container"></div>
+            </div>
+
+            <!-- Weekly overview Bar / Line chart -->
+            <div class="custom-card rounded-3xl p-6 lg:col-span-2 flex flex-col justify-between" id="step-performance">
+              <div class="flex justify-between items-center mb-4">
+                <div>
+                  <h4 class="text-sm font-bold text-gray-900">Weekly Performance</h4>
+                  <p class="text-xs text-gray-400">Comparing study sessions by date</p>
+                </div>
+                <div class="flex space-x-1">
+                  <span class="px-3 py-1 bg-violet-50 text-violet-600 rounded-lg text-[10px] font-bold uppercase tracking-wider">Hours spent</span>
+                </div>
+              </div>
+              <div class="w-full h-[240px] relative flex items-center justify-center" id="weekly-chart-wrapper">
+                <canvas id="chartWeeklyPerformance" class="z-10"></canvas>
+                <div id="weekly-empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 bg-gray-50/20 rounded-2xl">
+                  <span class="text-2xl">📈</span>
+                  <p class="text-xs text-gray-400 mt-1 font-medium">Start logging study minutes to populate weekly statistics</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ================== TAB: SUBJECTS ================== -->
+        <div id="tab-subjects" class="hidden space-y-6">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-xl font-bold">Subjects & Topic Hierarchies</h3>
+              <p class="text-xs text-gray-400">Configure your study layout and structure.</p>
+            </div>
+            <button id="btn-new-subject" onclick="openSubjectModal()" class="px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-semibold transition flex items-center space-x-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4"></path></svg>
+              <span>New Subject</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="subject-cards-grid"></div>
+        </div>
+
+        <!-- ================== TAB: UNIFIED TASKS BOARD ================== -->
+        <div id="tab-tasks" class="hidden space-y-6">
+          
+          <!-- Header and Summaries -->
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h3 class="text-xl font-bold">Task Prioritization Board</h3>
+              <p class="text-xs text-gray-400">Keep targets structured, balanced, and tracked.</p>
+            </div>
+          </div>
+
+          <!-- Compact Summary Badges -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white border border-gray-100 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+              <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Tasks</p>
+                <h4 class="text-2xl font-black mt-1 text-gray-800" id="header-total-tasks">0</h4>
+              </div>
+              <div class="text-2xl p-2 bg-purple-50 text-purple-500 rounded-xl">📋</div>
+            </div>
+            <div class="bg-white border border-gray-100 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+              <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">High Priority</p>
+                <h4 class="text-2xl font-black mt-1 text-red-500" id="header-high-tasks">0</h4>
+              </div>
+              <div class="text-2xl p-2 bg-red-50 text-red-500 rounded-xl">🔥</div>
+            </div>
+            <div class="bg-white border border-gray-100 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+              <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Due Today</p>
+                <h4 class="text-2xl font-black mt-1 text-amber-500" id="header-today-tasks">0</h4>
+              </div>
+              <div class="text-2xl p-2 bg-amber-50 text-amber-500 rounded-xl">📅</div>
+            </div>
+          </div>
+
+          <!-- Filters and Action bar -->
+          <div class="bg-white border border-gray-100 rounded-2xl p-4 flex flex-wrap gap-4 items-center justify-between shadow-sm">
+            <div class="flex flex-wrap gap-4 items-center">
+              
+              <!-- Filter: Subject -->
+              <div class="flex items-center space-x-1.5">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Subject:</span>
+                <select id="task-filter-subject-select" onchange="renderTasks()" class="text-xs font-semibold bg-gray-50 border border-gray-150 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-500 text-gray-700">
+                  <option value="">All Subjects</option>
+                </select>
+              </div>
+
+              <!-- Filter: Status -->
+              <div class="flex items-center space-x-1.5">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Status:</span>
+                <select id="task-filter-status-select" onchange="renderTasks()" class="text-xs font-semibold bg-gray-50 border border-gray-150 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-500 text-gray-700">
+                  <option value="">All Statuses</option>
+                  <option value="Not Started">Not Started</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+
+              <!-- Sort Option -->
+              <div class="flex items-center space-x-1.5">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Sort:</span>
+                <select id="task-sort-select" onchange="renderTasks()" class="text-xs font-semibold bg-gray-50 border border-gray-150 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-500 text-gray-700">
+                  <option value="priority">Priority Order</option>
+                  <option value="due-date">Due Date</option>
+                </select>
+              </div>
+
+            </div>
+
+            <button id="btn-add-task" onclick="openAddTaskModal()" class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-bold tracking-wide transition flex items-center space-x-2 shadow-sm">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4"></path></svg>
+              <span>Add New Task</span>
+            </button>
+          </div>
+
+          <!-- Tasks Listing grid -->
+          <div class="space-y-3.5" id="tasks-list-container"></div>
+        </div>
+
+        <!-- ================== TAB: ANALYTICS ================== -->
+        <div id="tab-analytics" class="hidden space-y-6">
+          <div>
+            <h3 class="text-xl font-bold">Tracked Performance Analytics</h3>
+            <p class="text-xs text-gray-400">Review complete metrics across both custom time-windows and topic-breakdowns.</p>
+          </div>
+
+          <!-- Analytics KPI Metric Highlight Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="custom-card rounded-3xl p-5 flex items-center space-x-4">
+              <div class="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center text-xl text-violet-500">⏱️</div>
+              <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Avg Session Length</p>
+                <h4 class="text-xl font-black text-gray-800" id="analytic-avg-duration">0m</h4>
+              </div>
+            </div>
+            <div class="custom-card rounded-3xl p-5 flex items-center space-x-4">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-xl text-emerald-500">📈</div>
+              <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Weekly Goal Progress</p>
+                <h4 class="text-xl font-black text-gray-800" id="analytic-goal-completion">0%</h4>
+              </div>
+            </div>
+            <div class="custom-card rounded-3xl p-5 flex items-center space-x-4">
+              <div class="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-xl text-orange-500">✅</div>
+              <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Task Completion Rate</p>
+                <h4 class="text-xl font-black text-gray-800" id="analytic-task-pct">0%</h4>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analytics Layout -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Monthly Study Overview -->
+            <div class="custom-card rounded-3xl p-6 lg:col-span-2 flex flex-col justify-between">
+              <div class="flex justify-between items-center mb-4">
+                <div>
+                  <h4 class="text-sm font-bold text-gray-900">Monthly Study Overview</h4>
+                  <p class="text-[10px] text-gray-400 font-medium">Daily breakdowns categorized by subject</p>
+                </div>
+                <div class="flex flex-wrap gap-2 text-[10px] justify-end" id="monthly-subjects-indicators"></div>
+              </div>
+              
+              <!-- Weekly headers -->
+              <div class="flex items-center text-[9px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">
+                <span class="w-12">Day</span>
+                <div class="flex-1 flex justify-between px-4">
+                  <span>W1</span>
+                  <span>W2</span>
+                  <span>W3</span>
+                  <span>W4</span>
+                </div>
+                <span class="w-12 text-right">Total</span>
+              </div>
+              
+              <!-- Scrollable daily grid -->
+              <div class="space-y-2 max-h-[310px] overflow-y-auto pr-1" id="monthly-study-rows-container"></div>
+            </div>
+
+            <!-- Weekly Subject Timeline -->
+            <div class="custom-card rounded-3xl p-6 lg:col-span-1 flex flex-col justify-between">
+              <div>
+                <div class="flex justify-between items-center mb-4">
+                  <h4 class="text-sm font-bold text-gray-900 flex items-center space-x-2">
+                    <span>📚</span>
+                    <span>Weekly Subject Timeline</span>
+                  </h4>
+                </div>
+                <div class="space-y-4" id="weekly-subject-timeline-container"></div>
+              </div>
+            </div>
+
+            <!-- Pomodoro Overview Card -->
+            <div class="custom-card rounded-3xl p-6 lg:col-span-3">
+              <h4 class="text-sm font-bold text-gray-900 mb-4">Pomodoro Tracker Performance Overview</h4>
+              <div class="grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
+                <div class="md:col-span-2 flex flex-col items-center justify-center space-y-4">
+                  <div class="relative w-32 h-32 flex items-center justify-center">
+                    <canvas id="chartPomodoro"></canvas>
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <span class="text-3xl">🍅</span>
+                    </div>
+                  </div>
+                  <div class="space-y-1.5 w-full text-[11px]" id="pomo-metric-breakdown">
+                    <div class="flex justify-between items-center">
+                      <span class="flex items-center space-x-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                        <span class="font-semibold text-gray-600">Focus Time</span>
+                      </span>
+                      <span class="font-bold text-gray-800" id="pomo-focus-total">0h 00m</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="flex items-center space-x-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-pink-300"></span>
+                        <span class="font-semibold text-gray-600">Break Time</span>
+                      </span>
+                      <span class="font-bold text-gray-800" id="pomo-break-total">0h 00m</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="md:col-span-3 grid grid-cols-2 gap-3">
+                  <div class="bg-emerald-50/50 border border-emerald-100 p-3 rounded-2xl flex flex-col items-center justify-center text-center">
+                    <span class="text-lg">🍀</span>
+                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-1">Total Pomodoros</span>
+                    <span class="text-base font-black text-gray-800 mt-0.5" id="pomo-total-intervals">0</span>
+                  </div>
+                  <div class="bg-blue-50/50 border border-blue-100 p-3 rounded-2xl flex flex-col items-center justify-center text-center">
+                    <span class="text-lg">⏱️</span>
+                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-1">Completed Rounds</span>
+                    <span class="text-base font-black text-gray-800 mt-0.5" id="pomo-focus-rounds">0</span>
+                  </div>
+                  <div class="bg-orange-50/50 border border-orange-100 p-3 rounded-2xl flex flex-col items-center justify-center text-center">
+                    <span class="text-lg">🏆</span>
+                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-1">Break Rounds</span>
+                    <span class="text-base font-black text-gray-800 mt-0.5" id="pomo-break-rounds">0</span>
+                  </div>
+                  <div class="bg-purple-50/50 border border-purple-100 p-3 rounded-2xl flex flex-col items-center justify-center text-center">
+                    <span class="text-lg">🔥</span>
+                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-1">Streak</span>
+                    <span class="text-base font-black text-gray-800 mt-0.5" id="pomo-streak-days">0 Days</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ================== TAB: HISTORY ================== -->
+        <div id="tab-history" class="hidden space-y-6">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-xl font-bold">Study Log Archives</h3>
+              <p class="text-xs text-gray-400">Detailed logs of every study session recorded.</p>
+            </div>
+            <button onclick="openManualLogModal()" class="px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-semibold transition">Log Session Manually</button>
+          </div>
+
+          <!-- History Table/Log -->
+          <div class="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-soft">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse min-w-[600px]">
+                <thead>
+                  <tr class="bg-gray-50 text-gray-400 text-[10px] font-bold uppercase tracking-wider border-b border-gray-100">
+                    <th class="p-4 pl-6">Subject</th>
+                    <th class="p-4">Topic</th>
+                    <th class="p-4">Date & Time</th>
+                    <th class="p-4">Duration</th>
+                    <th class="p-4 text-right pr-6">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="history-table-body" class="divide-y divide-gray-50 text-xs"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ================== PANEL / CONTROL CENTER (RIGHT) ================== -->
+    <aside class="w-80 bg-white border-l border-gray-100 p-6 flex flex-col justify-between flex-shrink-0 h-full overflow-y-auto space-y-6 hidden xl:flex">
+      
+      <!-- Primary Timer Module -->
+      <div class="custom-card rounded-3xl p-5 border border-purple-100 bg-purple-50/20" id="step-timer">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center space-x-1">
+            <span class="text-sm">⏱️</span>
+            <h4 class="text-sm font-bold text-gray-800">Study Timer</h4>
+          </div>
+          <button onclick="resetTimer()" class="p-1 hover:bg-purple-50 rounded-lg text-gray-400" title="Reset Current Timer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5"></path></svg>
+          </button>
+        </div>
+
+        <!-- Target Selector Selectors -->
+        <div class="space-y-2 mb-4">
+          <select id="timer-subject-select" onchange="updateTimerTopicOptions()" class="w-full text-xs font-semibold bg-white border border-gray-100 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-violet-500 text-gray-700">
+          </select>
+          <select id="timer-topic-select" class="w-full text-xs bg-white border border-gray-100 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-violet-500 text-gray-600">
+          </select>
+        </div>
+
+        <!-- Mode Selector -->
+        <div class="flex bg-gray-100/50 p-1 rounded-2xl mb-4">
+          <button id="btn-mode-normal" onclick="setTimerMode('normal')" class="flex-1 py-1.5 text-xs font-bold rounded-xl bg-violet-600 text-white shadow-sm transition">Normal Mode</button>
+          <button id="btn-mode-pomo" onclick="setTimerMode('pomodoro')" class="flex-1 py-1.5 text-xs font-medium text-gray-400 hover:text-gray-600 transition">Pomodoro Mode</button>
+        </div>
+
+        <!-- Functional Pomodoro Interval Inputs -->
+        <div id="pomo-settings-container" class="hidden grid grid-cols-2 gap-2 mb-4">
+          <div>
+            <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Focus (Mins)</label>
+            <input type="number" id="pomo-focus-input" value="25" min="1" max="180" class="w-full text-xs font-bold bg-white border border-gray-100 rounded-xl px-2 py-1.5 text-center focus:ring-2 focus:ring-violet-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Break (Mins)</label>
+            <input type="number" id="pomo-break-input" value="5" min="1" max="60" class="w-full text-xs font-bold bg-white border border-gray-100 rounded-xl px-2 py-1.5 text-center focus:ring-2 focus:ring-violet-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Countdown / Stopwatch Interface -->
+        <div class="relative flex flex-col items-center justify-center my-6">
+          <div class="w-44 h-44 rounded-full border border-violet-100 flex items-center justify-center relative bg-white shadow-sm">
+            <div class="absolute inset-2 rounded-full border border-dashed border-violet-200"></div>
+            
+            <div class="flex flex-col items-center justify-center z-10 text-center px-2">
+              <span class="text-xl" id="timer-emoji">⏰</span>
+              <h1 class="font-mono text-3xl font-black text-gray-800 mt-2 tracking-tight" id="timer-time-display">00:00:00</h1>
+              <p class="text-[9px] font-bold text-violet-500 tracking-wider uppercase mt-1" id="timer-status-label">Focus Time</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="grid grid-cols-3 gap-2">
+          <button id="btn-timer-play" onclick="toggleTimer()" class="py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-[11px] font-bold shadow-md transition flex items-center justify-center space-x-1">
+            <span id="btn-timer-icon-svg">▶</span> <span id="btn-timer-text">Start</span>
+          </button>
+          <button onclick="stopAndSaveTimer()" class="py-2.5 rounded-xl bg-violet-50 hover:bg-violet-100 text-violet-700 text-[11px] font-bold transition flex items-center justify-center space-x-1">
+            <span>⏸</span> <span>Stop</span>
+          </button>
+          <button onclick="resetTimer()" class="py-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 text-[11px] font-bold transition flex items-center justify-center space-x-1">
+            <span>↻</span> <span>Reset</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Today's Goals List Module -->
+      <div class="flex-1 flex flex-col justify-between overflow-hidden">
+        <div class="flex flex-col flex-1 overflow-hidden">
+          <div class="flex justify-between items-center mb-3">
+            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center space-x-1">
+              <span>🎯</span> <span>Today's Goal</span>
+            </h4>
+            <span class="text-[10px] font-black text-violet-600" id="today-goal-fraction">0 / 0</span>
+          </div>
+
+          <!-- Goal Progress Indicator -->
+          <div id="today-goal-progress-container" class="space-y-1.5 mb-3 hidden">
+            <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+              <div id="today-goal-progress-bar" class="bg-violet-500 h-full rounded-full transition-all duration-300" style="width: 0%;"></div>
+            </div>
+            <div class="flex justify-between items-center text-[10px] tracking-tight">
+              <span id="today-goal-motivation" class="text-gray-400 font-semibold truncate max-w-[150px]">Let's get started! 🚀</span>
+              <span id="today-goal-percent" class="text-gray-500 font-bold">0%</span>
+            </div>
+          </div>
+
+          <!-- Scrollable Checklist Container -->
+          <div class="flex-1 space-y-2 overflow-y-auto max-h-[190px] pr-1" id="today-goals-list-container"></div>
+        </div>
+
+        <!-- Upcoming Goals Progress -->
+        <div class="border-t border-gray-100 pt-4 mt-4" id="step-goal">
+          <div class="flex justify-between items-center text-xs mb-1">
+            <span class="font-bold text-gray-700">Daily Progress Goal</span>
+            <span class="text-gray-400 font-semibold" id="goal-fraction-display">00h 00m / 20h</span>
+          </div>
+          <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+            <div class="bg-violet-500 h-full rounded-full transition-all duration-500" id="goal-progress-bar" style="width: 0%;"></div>
+          </div>
+          <div class="flex justify-between items-center text-[10px] text-gray-400 mt-1">
+            <span>Keep pushing! 🚀</span>
+            <span id="goal-percentage-display">0% complete</span>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+
+
+  <!-- ================== MODAL: MANUAL ENTRY LOG ================== -->
+  <div id="modal-manual-log" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full mx-4 shadow-xl space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-bold">Log Study Session Manually</h3>
+        <button onclick="closeManualLogModal()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">Subject</label>
+          <select id="manual-subject" onchange="updateManualTopicOptions()" class="w-full border border-gray-100 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">Topic (Optional)</label>
+          <select id="manual-topic" class="w-full border border-gray-100 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Session Date</label>
+            <input type="date" id="manual-date" class="w-full border border-gray-100 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Start Time</label>
+            <input type="time" id="manual-time" class="w-full border border-gray-100 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Hours</label>
+            <input type="number" id="manual-hours" placeholder="0" min="0" class="w-full border border-gray-100 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Minutes</label>
+            <input type="number" id="manual-minutes" placeholder="30" min="0" max="59" class="w-full border border-gray-100 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Seconds</label>
+            <input type="number" id="manual-seconds" placeholder="0" min="0" max="59" class="w-full border border-gray-100 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+          </div>
+        </div>
+      </div>
+
+      <div class="flex space-x-2 pt-2">
+        <button onclick="closeManualLogModal()" class="flex-1 py-2.5 border border-gray-100 text-gray-500 font-semibold text-xs rounded-xl hover:bg-gray-50 transition">Cancel</button>
+        <button onclick="submitManualLog()" class="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs rounded-xl transition">Record Log</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================== MODAL: ADD SUBJECT (Color Palette Expanded) ================== -->
+  <div id="modal-subject" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full mx-4 shadow-xl space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-bold">Create New Subject</h3>
+        <button onclick="closeSubjectModal()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">Subject Name</label>
+          <input type="text" id="subj-input-name" placeholder="e.g. Physics" class="w-full border border-gray-100 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">Color Theme Accent</label>
+          <div class="grid grid-cols-5 gap-2 pt-1">
+            <button onclick="setSubjAccent('#A78BFA', this)" class="h-8 rounded-xl bg-[#A78BFA] border-2 border-transparent transition-all outline-none subj-color-bubble ring-2 ring-violet-500" data-color="#A78BFA" title="Lavender"></button>
+            <button onclick="setSubjAccent('#F472B6', this)" class="h-8 rounded-xl bg-[#F472B6] border-2 border-transparent transition-all outline-none subj-color-bubble" data-color="#F472B6" title="Sakura Pink"></button>
+            <button onclick="setSubjAccent('#FB923C', this)" class="h-8 rounded-xl bg-[#FB923C] border-2 border-transparent transition-all outline-none subj-color-bubble" data-color="#FB923C" title="Peach Orange"></button>
+            <button onclick="setSubjAccent('#34D399', this)" class="h-8 rounded-xl bg-[#34D399] border-2 border-transparent transition-all outline-none subj-color-bubble" data-color="#34D399" title="Matcha Green"></button>
+            <button onclick="setSubjAccent('#60A5FA', this)" class="h-8 rounded-xl bg-[#60A5FA] border-2 border-transparent transition-all outline-none subj-color-bubble" data-color="#60A5FA" title="Sky Blue"></button>
+            <button onclick="setSubjAccent('#2DD4BF', this)" class="h-8 rounded-xl bg-[#2DD4BF] border-2 border-transparent transition-all outline-none subj-color-bubble" data-color="#2DD4BF" title="Mint"></button>
+            <button onclick="setSubjAccent('#FACC15', this)" class="h-8 rounded-xl bg-[#FACC15] border-2 border-transparent transition-all outline-none subj-color-bubble" data-color="#FACC15" title="Lemon Yellow"></button>
+            <button onclick="setSubjAccent('#FB7185', this)" class="h-8 rounded-xl bg-[#FB7185] border-2 border-transparent transition-all outline-none subj-color-bubble" data-color="#FB7185" title="Coral"></button>
+            <button onclick="setSubjAccent('#818CF8', this)" class="h-8 rounded-xl bg-[#818CF8] border-2 border-transparent transition-all outline-none subj-color-bubble" data-color="#818CF8" title="Periwinkle"></button>
+            <button onclick="setSubjAccent('#22D3EE', this)" class="h-8 rounded-xl bg-[#22D3EE] border-2 border-transparent transition-all outline-none subj-color-bubble" data-color="#22D3EE" title="Aqua"></button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">Sub-topics (Comma separated)</label>
+          <textarea id="subj-input-topics" placeholder="e.g. Kinematics, Thermodynamics, Optics" rows="2" class="w-full border border-gray-100 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none"></textarea>
+        </div>
+      </div>
+
+      <div class="flex space-x-2 pt-2">
+        <button onclick="closeSubjectModal()" class="flex-1 py-2.5 border border-gray-100 text-gray-500 font-semibold text-xs rounded-xl hover:bg-gray-50 transition">Cancel</button>
+        <button onclick="submitSubject()" class="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs rounded-xl transition">Create</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================== MODAL: ADD TASK ================== -->
+  <div id="modal-task" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full mx-4 shadow-xl space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-bold">Add New Task / Target</h3>
+        <button onclick="closeAddTaskModal()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">Task Description</label>
+          <input type="text" id="task-input-desc" placeholder="e.g. Read Physics textbook section 2" class="w-full border border-gray-100 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 mb-1">Associate Subject (Optional)</label>
+          <select id="task-input-subject" class="w-full border border-gray-100 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Due Date</label>
+            <input type="date" id="task-input-duedate" class="w-full border border-gray-100 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Est. Duration</label>
+            <input type="text" id="task-input-duration" placeholder="e.g. 45m" class="w-full border border-gray-100 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Priority Classification</label>
+            <select id="task-input-priority" class="w-full border border-gray-100 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+              <option value="do-now">🔥 Do Now (Urgent & Important)</option>
+              <option value="do-later">🎯 Do Later (Important, Not Urgent)</option>
+              <option value="schedule">📅 Schedule (Urgent, Not Important)</option>
+              <option value="low">🌱 Low Priority (Eliminate/Postpone)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Status</label>
+            <select id="task-input-status" class="w-full border border-gray-100 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-violet-500 focus:outline-none">
+              <option value="Not Started">Not Started</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex space-x-2 pt-2">
+        <button onclick="closeAddTaskModal()" class="flex-1 py-2.5 border border-gray-100 text-gray-500 font-semibold text-xs rounded-xl hover:bg-gray-50 transition">Cancel</button>
+        <button onclick="submitTask()" class="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs rounded-xl transition">Add Objective</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ================== JAVASCRIPT LOGIC ENGINE ================== -->
+  <script>
+    
+    // Application core state cache
+    let state = {
+      user: { userName: "", theme: "lavender", weeklyGoal: 20, streak: 0 },
+      subjects: [],
+      sessions: [],
+      tasks: []
+    };
+
+    // Live Timer Engine State Configuration
+    let timerRunning = false;
+    let timerInterval = null;
+    let timerMode = 'normal'; // 'normal' | 'pomodoro'
+    let pomoPhase = 'focus'; // 'focus' | 'break'
+    let timerSecondsElapsed = 0; 
+    let timerSecondsRemaining = 0; 
+
+    let activeSubjectId = "";
+    let activeTopicName = "";
+    let activeSubjAccentSelected = "#A78BFA";
+
+    let chartBreakdownRef = null;
+    let chartWeeklyRef = null;
+    let chartPomodoroRef = null;
+
+    // Wizard Flow Variables
+    let onboardingStep = 1;
+    let wizardSubjectColor = "#A78BFA";
+
+    // Dynamic Context-Sensitive Tutorial State Variables
+    let tutorialMode = "onboarding"; // "onboarding" | "replay" | "context-subjects" | "context-tasks"
+    let tutorialCurrentStep = 1;
+
+    let subjectsTutorialShown = localStorage.getItem("subjects_tutorial_shown") === "true";
+    let tasksTutorialShown = localStorage.getItem("tasks_tutorial_shown") === "true";
+
+    // Toggle loader indicators on async fetches
+    function showLoadingSpinner(show) {
+      const spinner = document.getElementById("loading-spinner");
+      if (spinner) {
+        if (show) spinner.classList.remove("hidden");
+        else spinner.classList.add("hidden");
+      }
+    }
+
+    // Toast Notification logic
+    function showToast(message, type = 'success') {
+      const container = document.getElementById("toast-container");
+      if (!container) return;
+
+      const toast = document.createElement("div");
+      toast.className = `flex items-center space-x-2.5 px-4 py-3 rounded-2xl text-xs font-semibold shadow-lg transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto min-w-[200px] border`;
+
+      let icon = "💡";
+      if (type === 'success') {
+        toast.className += " bg-emerald-50 text-emerald-700 border-emerald-100";
+        icon = "✅";
+      } else if (type === 'warning') {
+        toast.className += " bg-amber-50 text-amber-700 border-amber-100";
+        icon = "⚠️";
+      } else if (type === 'info') {
+        toast.className += " bg-purple-50 text-purple-700 border-purple-100";
+        icon = "ℹ️";
+      }
+
+      toast.innerHTML = `<span>${icon}</span><span class="flex-1">${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.remove("translate-y-2", "opacity-0");
+      }, 50);
+
+      setTimeout(() => {
+        toast.classList.add("opacity-0", "translate-y-[-10px]");
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // Custom Confirmation Dialog helper
+    function showCustomConfirm(title, message, callback) {
+      const dialog = document.getElementById("confirm-dialog");
+      const titleEl = document.getElementById("confirm-title");
+      const messageEl = document.getElementById("confirm-message");
+      const cancelBtn = document.getElementById("confirm-cancel-btn");
+      const okBtn = document.getElementById("confirm-ok-btn");
+
+      titleEl.innerText = title;
+      messageEl.innerText = message;
+      dialog.classList.remove("hidden");
+
+      const closeConfirm = () => {
+        dialog.classList.add("hidden");
+        cancelBtn.removeEventListener("click", handleCancel);
+        okBtn.removeEventListener("click", handleOk);
+      };
+
+      const handleCancel = () => {
+        closeConfirm();
+      };
+
+      const handleOk = () => {
+        closeConfirm();
+        callback();
+      };
+
+      cancelBtn.addEventListener("click", handleCancel);
+      okBtn.addEventListener("click", handleOk);
+    }
+
+    // Clear previous tutorial rings
+    function clearTutorialHighlights() {
+      const targets = ["step-timer", "step-metrics", "btn-new-subject", "btn-add-task"];
+      targets.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove("ring-4", "ring-violet-500", "relative", "z-50");
+      });
+    }
+
+    // Dynamic Steps generator mapping modes
+    function getTutorialSteps() {
+      if (tutorialMode === "onboarding" || tutorialMode === "replay") {
+        return [
+          {
+            targetId: "step-timer",
+            title: "Step 1: The Study Tracker Timer",
+            desc: "Choose your subject and start logging focus minutes. You can switch between standard stopwatch mode and a pomodoro timer here.",
+            action: () => switchTab('dashboard')
+          },
+          {
+            targetId: "step-metrics",
+            title: "Step 2: Dynamic Metrics Overview",
+            desc: "Watch your study metrics, milestones, weekly targets, and streaks update as focus sessions are registered.",
+            action: () => switchTab('dashboard')
+          },
+          {
+            targetId: "btn-new-subject",
+            title: "Step 3: Subjects & Topics Setup",
+            desc: "Click 'New Subject' to configure class course details. Create subjects, assign aesthetic colors, and add topic lists which populate in the study clock selector.",
+            action: () => switchTab('subjects')
+          },
+          {
+            targetId: "btn-add-task",
+            title: "Step 4: Task Board Priority",
+            desc: "Click 'Add New Task' to manage assignments. Specify subjects, priority limits, and track accomplishments visually.",
+            action: () => switchTab('tasks')
+          }
+        ];
+      } else if (tutorialMode === "context-subjects") {
+        return [
+          {
+            targetId: "btn-new-subject",
+            title: "Subjects & Topics Tutorial",
+            desc: "Click 'New Subject' to create your first course node. Choose a customized name, pick an accent color, and add sub-topics. These will automatically appear in your active Study Timer."
+          }
+        ];
+      } else if (tutorialMode === "context-tasks") {
+        return [
+          {
+            targetId: "btn-add-task",
+            title: "Task Board Tutorial",
+            desc: "Click 'Add New Task' to create task parameters. Assign tasks to subjects, choose urgency weights, set due dates, and track completion progress directly on the prioritizer board."
+          }
+        ];
+      }
+      return [];
+    }
+
+    function startAppTutorial() {
+      tutorialMode = "replay";
+      tutorialCurrentStep = 1;
+      document.getElementById("tutorial-overlay").classList.remove("hidden");
+      applyTutorialStep();
+    }
+
+    function triggerContextualTutorial(mode) {
+      tutorialMode = mode;
+      tutorialCurrentStep = 1;
+      document.getElementById("tutorial-overlay").classList.remove("hidden");
+      
+      if (mode === "context-subjects") {
+        subjectsTutorialShown = true;
+        localStorage.setItem("subjects_tutorial_shown", "true");
+      } else if (mode === "context-tasks") {
+        tasksTutorialShown = true;
+        localStorage.setItem("tasks_tutorial_shown", "true");
+      }
+      applyTutorialStep();
+    }
+
+    function applyTutorialStep() {
+      const steps = getTutorialSteps();
+      const step = steps[tutorialCurrentStep - 1];
+      if (!step) {
+        skipTutorial();
+        return;
+      }
+
+      // Execute program tab updates if step actions exist
+      if (step.action) {
+        step.action();
+      }
+
+      setTimeout(() => {
+        const card = document.getElementById("tutorial-card");
+        const indicator = document.getElementById("tutorial-steps-indicator");
+        const title = document.getElementById("tutorial-title");
+        const desc = document.getElementById("tutorial-desc");
+
+        indicator.innerText = `Step ${tutorialCurrentStep} of ${steps.length}`;
+        title.innerText = step.title;
+        desc.innerText = step.desc;
+
+        clearTutorialHighlights();
+
+        const target = document.getElementById(step.targetId);
+        const isVisible = target && target.offsetParent !== null;
+        if (isVisible) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          target.classList.add("ring-4", "ring-violet-500", "relative", "z-50");
+
+          const bounds = target.getBoundingClientRect();
+          const screenWidth = window.innerWidth;
+          const screenHeight = window.innerHeight;
+
+          let leftPos = bounds.left;
+          let topPos = bounds.bottom + window.scrollY + 12;
+
+          if (leftPos + 384 > screenWidth) {
+            leftPos = screenWidth - 400;
+          }
+          if (topPos + 220 > screenHeight + window.scrollY) {
+            topPos = bounds.top + window.scrollY - 220;
+          }
+
+          card.style.left = `${Math.max(16, leftPos)}px`;
+          card.style.top = `${Math.max(16, topPos)}px`;
+          card.style.position = "absolute";
+          card.style.transform = "none";
+        } else {
+          card.style.left = "50%";
+          card.style.top = "50%";
+          card.style.transform = "translate(-50%, -50%)";
+          card.style.position = "fixed";
+        }
+
+        document.getElementById("tutorial-prev-btn").disabled = (tutorialCurrentStep === 1);
+        document.getElementById("tutorial-next-btn").innerText = (tutorialCurrentStep === steps.length) ? "Got It / Finish" : "Next";
+      }, 150);
+    }
+
+    function nextTutorialStep() {
+      const steps = getTutorialSteps();
+      if (tutorialCurrentStep < steps.length) {
+        tutorialCurrentStep++;
+        applyTutorialStep();
+      } else {
+        skipTutorial();
+      }
+    }
+
+    function prevTutorialStep() {
+      if (tutorialCurrentStep > 1) {
+        tutorialCurrentStep--;
+        applyTutorialStep();
+      }
+    }
+
+    function skipTutorial() {
+      clearTutorialHighlights();
+      document.getElementById("tutorial-overlay").classList.add("hidden");
+      showToast("Tutorial finished. Enjoy your study tracking!", "info");
+      
+      if (tutorialMode === "onboarding" || tutorialMode === "replay") {
+        localStorage.setItem("subjects_tutorial_shown", "true");
+        localStorage.setItem("tasks_tutorial_shown", "true");
+        subjectsTutorialShown = true;
+        tasksTutorialShown = true;
+      }
+    }
+
+    // ==================== ONBOARDING MULTI-STEP WIZARD FUNCTIONS ====================
+    
+    function showOnboardingStep(stepNum) {
+      for (let i = 1; i <= 5; i++) {
+        const panel = document.getElementById(`onboard-step-${i}`);
+        const dot = document.getElementById(`dot-${i}`);
+        if (panel) {
+          if (i === stepNum) panel.classList.remove("hidden");
+          else panel.classList.add("hidden");
+        }
+        if (dot) {
+          if (i === stepNum) {
+            dot.className = "w-2.5 h-2.5 rounded-full bg-violet-600 transition";
+          } else if (i < stepNum) {
+            dot.className = "w-2.5 h-2.5 rounded-full bg-violet-400 transition";
+          } else {
+            dot.className = "w-2.5 h-2.5 rounded-full bg-gray-200 transition";
+          }
+        }
+      }
+
+      const backBtn = document.getElementById("onboard-back-btn");
+      const nextBtn = document.getElementById("onboard-next-btn");
+      const titleLabel = document.getElementById("onboard-step-title");
+
+      const titles = [
+        "1. Profile setup",
+        "2. Core Class / Subject",
+        "3. Topics break-down",
+        "4. Daily Target Allocation",
+        "5. Review setup"
+      ];
+      if (titleLabel) titleLabel.innerText = titles[stepNum - 1];
+
+      if (stepNum === 1) {
+        if (backBtn) backBtn.classList.add("hidden");
+      } else {
+        if (backBtn) backBtn.classList.remove("hidden");
+      }
+
+      if (nextBtn) {
+        if (stepNum === 5) {
+          nextBtn.innerText = "Complete Setup & Launch";
+          nextBtn.className = "flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl transition";
+        } else {
+          nextBtn.innerText = "Next Step";
+          nextBtn.className = "flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs rounded-xl transition";
+        }
+      }
+
+      if (stepNum === 5) {
+        renderWizardSummary();
+      }
+    }
+
+    function selectWizardAccent(color, element) {
+      wizardSubjectColor = color;
+      document.querySelectorAll(".wizard-color-bubble").forEach(btn => {
+        btn.classList.remove("ring-2", "ring-violet-500");
+      });
+      if (element) {
+        element.classList.add("ring-2", "ring-violet-500");
+      }
+    }
+
+    function nextOnboardingStep() {
+      if (onboardingStep === 1) {
+        const nameVal = document.getElementById("wizard-name-input").value.trim();
+        if (!nameVal) {
+          showToast("A profile name is required to continue.", "warning");
+          return;
+        }
+      } else if (onboardingStep === 2) {
+        const subjVal = document.getElementById("wizard-subject-input").value.trim();
+        if (!subjVal) {
+          showToast("A subject name is required to organize your dashboard.", "warning");
+          return;
+        }
+      }
+
+      if (onboardingStep < 5) {
+        onboardingStep++;
+        showOnboardingStep(onboardingStep);
+      } else {
+        submitWizardOnboarding();
+      }
+    }
+
+    function prevOnboardingStep() {
+      if (onboardingStep > 1) {
+        onboardingStep--;
+        showOnboardingStep(onboardingStep);
+      }
+    }
+
+    function renderWizardSummary() {
+      const name = document.getElementById("wizard-name-input").value.trim();
+      const subject = document.getElementById("wizard-subject-input").value.trim();
+      const rawTopics = document.getElementById("wizard-topics-input").value;
+      const weeklyGoal = document.getElementById("wizard-goal-input").value;
+
+      const topicsArr = rawTopics ? rawTopics.split(",").map(t => t.trim()).filter(Boolean) : [];
+      let topicsPills = topicsArr.map(t => `<span class="px-2 py-0.5 bg-white text-gray-650 font-semibold rounded-md border border-gray-150 inline-block text-[10px]">${t}</span>`).join(" ");
+      if (topicsArr.length === 0) topicsPills = `<span class="text-gray-400 italic">None defined</span>`;
+
+      const card = document.getElementById("wizard-summary-card");
+      if (card) {
+        card.innerHTML = `
+          <div class="flex justify-between border-b border-gray-100 pb-1.5">
+            <span class="text-gray-450 font-medium">Student Name:</span>
+            <span class="font-bold text-gray-800">${name}</span>
+          </div>
+          <div class="flex justify-between border-b border-gray-100 pb-1.5 items-center">
+            <span class="text-gray-450 font-medium">First Subject:</span>
+            <span class="inline-flex items-center space-x-1.5 font-bold">
+              <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: ${wizardSubjectColor};"></span>
+              <span class="text-gray-800">${subject}</span>
+            </span>
+          </div>
+          <div class="border-b border-gray-100 pb-1.5">
+            <span class="text-gray-450 font-medium block mb-1">Sub-topics List:</span>
+            <div class="flex flex-wrap gap-1">${topicsPills}</div>
+          </div>
+          <div class="flex justify-between pt-0.5">
+            <span class="text-gray-450 font-medium">Weekly Focus Target:</span>
+            <span class="font-bold text-violet-600">${weeklyGoal} Hours / Week</span>
+          </div>
+        `;
+      }
+    }
+
+    async function submitWizardOnboarding() {
+      const name = document.getElementById("wizard-name-input").value.trim();
+      const subject = document.getElementById("wizard-subject-input").value.trim();
+      const rawTopics = document.getElementById("wizard-topics-input").value;
+      const weeklyGoal = document.getElementById("wizard-goal-input").value;
+
+      const topicsArr = rawTopics ? rawTopics.split(",").map(t => t.trim()).filter(Boolean) : [];
+
+      showLoadingSpinner(true);
+      try {
+        const response = await fetch('/api/onboard', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userName: name,
+            firstSubjectName: subject,
+            firstSubjectColor: wizardSubjectColor,
+            firstSubjectTopics: topicsArr,
+            weeklyGoal: parseInt(weeklyGoal)
+          })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.error || "Onboarding pipeline failed.");
+        }
+
+        const resData = await response.json();
+        showToast(`Setup complete! Welcome, ${resData.user.userName}.`, "success");
+        
+        document.getElementById("onboarding-modal").classList.add("hidden");
+        
+        await syncStateFromServer();
+        
+        // Auto initiate onboarding tutorial (Using identical full steps sequence)
+        tutorialMode = "onboarding";
+        tutorialCurrentStep = 1;
+        document.getElementById("tutorial-overlay").classList.remove("hidden");
+        applyTutorialStep();
+
+      } catch (err) {
+        showToast(err.message, "warning");
+      } finally {
+        showLoadingSpinner(false);
+      }
+    }
+
+    // ==================== ASYNC SERVER STATE SYNCHRONIZATION ====================
+
+    async function syncStateFromServer() {
+      showLoadingSpinner(true);
+      try {
+        // Appending dynamic timestamp cache-buster prevents cached responses after resets
+        const response = await fetch('/api/state?_t=' + Date.now());
+        if (!response.ok) throw new Error("Could not sync with the study database.");
+        
+        const data = await response.json();
+        if (data.setupRequired) {
+          onboardingStep = 1;
+          showOnboardingStep(onboardingStep);
+          document.getElementById("onboarding-modal").classList.remove("hidden");
+          return;
+        }
+
+        // Hide onboarding modal when setup is completed
+        document.getElementById("onboarding-modal").classList.add("hidden");
+
+        state.user = data.user;
+        state.subjects = data.subjects || [];
+        state.sessions = data.sessions || [];
+        state.tasks = data.tasks || [];
+
+        setThemeUI(state.user.theme);
+        initUI();
+        renderAll();
+
+      } catch (err) {
+        console.error(err);
+        showToast("Database sync error. Please verify database connection.", "warning");
+      } finally {
+        showLoadingSpinner(false);
+      }
+    }
+
+    function setTheme(themeName) {
+      setThemeUI(themeName);
+      
+      fetch('/api/user/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ theme: themeName })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error();
+        state.user.theme = themeName;
+      })
+      .catch(() => showToast("Theme update synchronization failed.", "warning"));
+    }
+
+    function setThemeUI(themeName) {
+      document.body.className = document.body.className.replace(/theme-\w+/g, "");
+      if (themeName !== 'lavender') {
+        document.body.classList.add(`theme-${themeName}`);
+      }
+      renderCharts();
+    }
+
+    // Restores default elements mapping for general track options
+    function initUI() {
+      const hrs = new Date().getHours();
+      let greet = "Good evening! 🌙";
+      if (hrs < 12) greet = "Good morning! ☀️";
+      else if (hrs < 18) greet = "Good afternoon! ☁️";
+      document.getElementById("greeting-banner").innerText = greet;
+
+      populateSubjectDropdowns();
+      setThemeUI(state.user.theme || "lavender");
+      setTimerMode('normal');
+
+      if (state.user && state.user.userName) {
+        document.getElementById("settings-name-input").value = state.user.userName;
+        document.getElementById("header-user-welcome").innerText = `Hello, ${state.user.userName}`;
+        document.getElementById("user-avatar-char").innerText = state.user.userName.charAt(0).toUpperCase();
+      }
+    }
+
+    async function updateProfileName(newName) {
+      if (!newName.trim()) return;
+      showLoadingSpinner(true);
+      try {
+        const response = await fetch('/api/user/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userName: newName.trim() })
+        });
+        if (!response.ok) throw new Error("Cloud update profile error.");
+        
+        state.user.userName = newName.trim();
+        initUI();
+        showToast("Profile name updated successfully", "success");
+      } catch (err) {
+        showToast(err.message, "warning");
+      } finally {
+        showLoadingSpinner(false);
+      }
+    }
+
+    function toggleMobileSidebar() {
+      const sb = document.getElementById("sidebar-panel");
+      if (sb.classList.contains("hidden")) {
+        sb.classList.remove("hidden");
+        sb.classList.add("fixed", "inset-y-0", "left-0", "z-40", "w-64", "flex");
+      } else {
+        sb.classList.add("hidden");
+        sb.classList.remove("fixed", "inset-y-0", "left-0", "z-40", "w-64", "flex");
+      }
+    }
+
+    function populateSubjectDropdowns() {
+      const timerSubj = document.getElementById("timer-subject-select");
+      const manualSubj = document.getElementById("manual-subject");
+      const taskSubj = document.getElementById("task-input-subject");
+      const filterSubj = document.getElementById("task-filter-subject-select");
+
+      let optsHTML = `<option value="">Select Target Subject</option>`;
+      let filterOptsHTML = `<option value="">All Subjects</option>`;
+      
+      state.subjects.forEach(s => {
+        optsHTML += `<option value="${s.id}">${s.name}</option>`;
+        filterOptsHTML += `<option value="${s.id}">${s.name}</option>`;
+      });
+
+      if (timerSubj) timerSubj.innerHTML = optsHTML;
+      if (manualSubj) manualSubj.innerHTML = optsHTML;
+      if (taskSubj) taskSubj.innerHTML = `<option value="">General (No Subject)</option>` + optsHTML;
+      if (filterSubj) filterSubj.innerHTML = filterOptsHTML;
+
+      updateTimerTopicOptions();
+      updateManualTopicOptions();
+    }
+
+    function updateTimerTopicOptions() {
+      const selectedSubjId = document.getElementById("timer-subject-select").value;
+      const timerTopic = document.getElementById("timer-topic-select");
+      
+      if (!selectedSubjId) {
+        timerTopic.innerHTML = `<option value="">General Subject Track</option>`;
+        return;
+      }
+
+      const subj = state.subjects.find(s => s.id === selectedSubjId);
+      let opts = `<option value="">Study Generally Under ${subj.name}</option>`;
+      if (subj && subj.topics) {
+        subj.topics.forEach(t => {
+          opts += `<option value="${t}">${t}</option>`;
+        });
+      }
+      timerTopic.innerHTML = opts;
+    }
+
+    function updateManualTopicOptions() {
+      const selectedSubjId = document.getElementById("manual-subject").value;
+      const manualTopic = document.getElementById("manual-topic");
+
+      if (!selectedSubjId) {
+        manualTopic.innerHTML = `<option value="">General Subject Track</option>`;
+        return;
+      }
+
+      const subj = state.subjects.find(s => s.id === selectedSubjId);
+      let opts = `<option value="">Study Generally</option>`;
+      if (subj && subj.topics) {
+        subj.topics.forEach(t => {
+          opts += `<option value="${t}">${t}</option>`;
+        });
+      }
+      manualTopic.innerHTML = opts;
+    }
+
+    function renderAll() {
+      renderDashboardStats();
+      renderCharts();
+      renderMonthlyStudyOverview();
+      renderWeeklySubjectTimeline();
+      renderSubjectList();
+      renderTasks();
+      renderHistoryTable();
+      renderGoalProgress();
+      renderTodaysGoals();
+    }
+
+    function renderDashboardStats() {
+      const getHoursMins = (secTotal) => {
+        const h = Math.floor(secTotal / 3600);
+        const m = Math.floor((secTotal % 3600) / 60);
+        return `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m`;
+      };
+
+      const startOfToday = new Date().setHours(0,0,0,0);
+      const todaySec = state.sessions
+        .filter(s => s.timestamp >= startOfToday)
+        .reduce((sum, s) => sum + s.duration, 0);
+      document.getElementById("stat-today").innerText = getHoursMins(todaySec);
+
+      const startOfWeek = Date.now() - (7 * 24 * 3600 * 1000);
+      const weekSec = state.sessions
+        .filter(s => s.timestamp >= startOfWeek)
+        .reduce((sum, s) => sum + s.duration, 0);
+      document.getElementById("stat-week").innerText = getHoursMins(weekSec);
+
+      const totalSec = state.sessions.reduce((sum, s) => sum + s.duration, 0);
+      document.getElementById("stat-total").innerText = getHoursMins(totalSec);
+
+      document.getElementById("stat-streak").innerText = `${state.user.streak || 0} days`;
+    }
+
+    function renderCharts() {
+      const hasSessions = state.sessions.length > 0;
+      
+      const donutEmpty = document.getElementById("donut-empty-state");
+      const weeklyEmpty = document.getElementById("weekly-empty-state");
+      const breakdownCanvas = document.getElementById("chartSubjectBreakdown");
+      const weeklyCanvas = document.getElementById("chartWeeklyPerformance");
+
+      if (hasSessions) {
+        if (donutEmpty) donutEmpty.classList.add("hidden");
+        if (weeklyEmpty) weeklyEmpty.classList.add("hidden");
+        if (breakdownCanvas) breakdownCanvas.classList.remove("opacity-20");
+        if (weeklyCanvas) weeklyCanvas.classList.remove("opacity-20");
+      } else {
+        if (donutEmpty) donutEmpty.classList.remove("hidden");
+        if (weeklyEmpty) weeklyEmpty.classList.remove("hidden");
+        if (breakdownCanvas) breakdownCanvas.classList.add("opacity-20");
+        if (weeklyCanvas) weeklyCanvas.classList.add("opacity-20");
+      }
+
+      const totalSec = state.sessions.reduce((sum, s) => sum + s.duration, 0) || 1;
+      const subjTimes = {};
+      state.subjects.forEach(s => {
+        subjTimes[s.name] = { color: s.color, seconds: 0 };
+      });
+
+      state.sessions.forEach(sess => {
+        const matchingSubj = state.subjects.find(s => s.id === String(sess.subjectId));
+        if (matchingSubj) {
+          subjTimes[matchingSubj.name] = subjTimes[matchingSubj.name] || { color: matchingSubj.color, seconds: 0 };
+          subjTimes[matchingSubj.name].seconds += sess.duration;
+        }
+      });
+
+      const donutLabels = [];
+      const donutData = [];
+      const donutColors = [];
+      let donutLegendHTML = "";
+
+      Object.keys(subjTimes).forEach(subjName => {
+        const item = subjTimes[subjName];
+        const pct = Math.round((item.seconds / totalSec) * 100);
+        donutLabels.push(subjName);
+        donutData.push(item.seconds);
+        donutColors.push(item.color);
+
+        const h = Math.floor(item.seconds / 3600);
+        const m = Math.floor((item.seconds % 3600) / 60);
+        const durationStr = `${h}h ${m}m`;
+
+        if (item.seconds > 0) {
+          donutLegendHTML += `
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="inline-flex items-center space-x-1.5">
+                <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: ${item.color};"></span>
+                <span class="font-bold text-gray-700">${subjName}</span>
+              </span>
+              <span class="text-gray-400 font-semibold">${pct}% (${durationStr})</span>
+            </div>
+          `;
+        }
+      });
+
+      const docLegend = document.getElementById("donut-legend-container");
+      if (docLegend) {
+        docLegend.innerHTML = donutLegendHTML || `<p class="text-[11px] text-center text-gray-400 font-medium">Log your first study session to view subject analytics.</p>`;
+      }
+
+      // Initialize Subject breakdown donut
+      const donutCtx = document.getElementById("chartSubjectBreakdown");
+      if (donutCtx) {
+        if (chartBreakdownRef) chartBreakdownRef.destroy();
+        
+        const initialLabels = hasSessions ? donutLabels : ["Pending Sessions"];
+        const initialData = hasSessions ? donutData : [100];
+        const initialColors = hasSessions ? donutColors : ["#e2e8f0"];
+
+        chartBreakdownRef = new Chart(donutCtx, {
+          type: 'doughnut',
+          data: {
+            labels: initialLabels,
+            datasets: [{
+              data: initialData,
+              backgroundColor: initialColors,
+              borderWidth: 0,
+              hoverOffset: hasSessions ? 4 : 0
+            }]
+          },
+          options: {
+            cutout: '70%',
+            plugins: { legend: { display: false } },
+            responsive: true,
+            maintainAspectRatio: true
+          }
+        });
+      }
+
+      // Initialize Weekly performance comparison bar
+      const barCtx = document.getElementById("chartWeeklyPerformance");
+      if (barCtx) {
+        const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const dailySec = [0, 0, 0, 0, 0, 0, 0];
+
+        state.sessions.forEach(s => {
+          const d = new Date(s.timestamp).getDay();
+          dailySec[d] += s.duration;
+        });
+
+        const formattedDailyHrs = dailySec.map(sec => Math.round((sec / 3600) * 10) / 10);
+
+        if (chartWeeklyRef) chartWeeklyRef.destroy();
+        chartWeeklyRef = new Chart(barCtx, {
+          type: 'bar',
+          data: {
+            labels: dayNames,
+            datasets: [{
+              label: 'Hours Spent Studying',
+              data: formattedDailyHrs,
+              backgroundColor: 'rgba(139, 92, 246, 0.65)',
+              borderRadius: 8,
+              borderWidth: 0
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                grid: { display: false },
+                ticks: { font: { size: 9, weight: 'bold' } }
+              },
+              x: {
+                grid: { display: false },
+                ticks: { font: { size: 10, weight: 'bold' } }
+              }
+            },
+            plugins: { legend: { display: false } },
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+      }
+
+      // Initialize Pomodoro Overview Chart
+      const pomoCtx = document.getElementById("chartPomodoro");
+      if (pomoCtx) {
+        if (chartPomodoroRef) chartPomodoroRef.destroy();
+
+        const focusSessions = state.sessions.filter(s => s.topic === "Pomodoro Focus");
+        const breakSessions = state.sessions.filter(s => s.topic === "Pomodoro Break" || s.topic === "Break Round");
+        
+        const focusDuration = focusSessions.reduce((sum, s) => sum + s.duration, 0);
+        const breakDuration = breakSessions.reduce((sum, s) => sum + s.duration, 0);
+
+        const formatDurationStr = (sec) => {
+          const h = Math.floor(sec / 3600);
+          const m = Math.floor((sec % 3600) / 60);
+          return `${h}h ${m}m`;
+        };
+
+        const totalPomoSec = focusDuration + breakDuration || 1;
+        const focusPct = Math.round((focusDuration / totalPomoSec) * 100);
+        const breakPct = Math.round((breakDuration / totalPomoSec) * 100);
+
+        document.getElementById("pomo-focus-total").innerText = `${formatDurationStr(focusDuration)} (${focusPct}%)`;
+        document.getElementById("pomo-break-total").innerText = `${formatDurationStr(breakDuration)} (${breakPct}%)`;
+        
+        const totalRounds = focusSessions.length + breakSessions.length;
+        document.getElementById("pomo-total-intervals").innerText = totalRounds;
+        document.getElementById("pomo-focus-rounds").innerText = focusSessions.length;
+        document.getElementById("pomo-break-rounds").innerText = breakSessions.length;
+        document.getElementById("pomo-streak-days").innerText = `${state.user.streak || 0} Days`;
+
+        chartPomodoroRef = new Chart(pomoCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ["Focus Time", "Break Time"],
+            datasets: [{
+              data: totalRounds > 0 ? [focusDuration, breakDuration] : [1, 0],
+              backgroundColor: totalRounds > 0 ? ["#f87171", "#f9a8d4"] : ["#e2e8f0", "#cbd5e1"],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            cutout: '80%',
+            plugins: { legend: { display: false } },
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+      }
+
+      // Calculate Analytics Page KPI Statistics
+      const sessionCount = state.sessions.length;
+      const totalSessionSec = state.sessions.reduce((sum, s) => sum + s.duration, 0);
+      const avgSec = sessionCount > 0 ? Math.round(totalSessionSec / sessionCount) : 0;
+      const avgMin = Math.round(avgSec / 60);
+      document.getElementById("analytic-avg-duration").innerText = `${avgMin}m`;
+
+      const startOfWeek = Date.now() - (7 * 24 * 3600 * 1000);
+      const weekSec = state.sessions
+        .filter(s => s.timestamp >= startOfWeek)
+        .reduce((sum, s) => sum + s.duration, 0);
+      const weeklyHours = weekSec / 3600;
+      const goalPct = Math.min(100, Math.round((weeklyHours / (state.user.weeklyGoal || 20)) * 100));
+      document.getElementById("analytic-goal-completion").innerText = `${goalPct}%`;
+
+      const completedTasks = state.tasks.filter(t => t.completed).length;
+      const totalTasks = state.tasks.length;
+      const taskPct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+      document.getElementById("analytic-task-pct").innerText = `${taskPct}%`;
+    }
+
+    function renderMonthlyStudyOverview() {
+      const container = document.getElementById("monthly-study-rows-container");
+      const indicators = document.getElementById("monthly-subjects-indicators");
+      if (!container) return;
+
+      let indHTML = "";
+      state.subjects.forEach(s => {
+        indHTML += `
+          <span class="inline-flex items-center space-x-1 font-semibold text-gray-500">
+            <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${s.color};"></span>
+            <span>${s.name}</span>
+          </span>
+        `;
+      });
+      indicators.innerHTML = indHTML || `<span class="text-xs text-gray-400">Configure subjects to trace timelines</span>`;
+
+      const daysInMonth = 31;
+      let html = "";
+      
+      const daySessionsMap = {};
+      state.sessions.forEach(sess => {
+        const dateObj = new Date(sess.timestamp);
+        const dayOfMonth = dateObj.getDate();
+        if (!daySessionsMap[dayOfMonth]) {
+          daySessionsMap[dayOfMonth] = [];
+        }
+        daySessionsMap[dayOfMonth].push(sess);
+      });
+
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dayNum = String(i).padStart(2, '0');
+        const dayOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][(i + 5) % 7];
+        const daySessions = daySessionsMap[i] || [];
+        
+        const totalDurationForDay = daySessions.reduce((sum, s) => sum + s.duration, 0);
+        const h = Math.floor(totalDurationForDay / 3600);
+        const m = Math.floor((totalDurationForDay % 3600) / 60);
+        const durationStr = `${h}h ${m}m`;
+
+        let segmentsHTML = "";
+        if (totalDurationForDay > 0) {
+          daySessions.forEach(sess => {
+            const subj = state.subjects.find(s => s.id === String(sess.subjectId));
+            const color = subj ? subj.color : "#94a3b8";
+            const percentWidth = Math.max(10, Math.round((sess.duration / totalDurationForDay) * 100));
+            segmentsHTML += `<div style="width: ${percentWidth}%; background-color: ${color};" class="h-full" title="${subj ? subj.name : 'General'} - ${Math.round(sess.duration/60)} mins"></div>`;
+          });
+        } else {
+          segmentsHTML = `<div class="w-full h-full bg-gray-100/40"></div>`;
+        }
+
+        html += `
+          <div class="flex items-center space-x-2 text-[10px]">
+            <span class="w-12 text-gray-400 font-bold tracking-tight">${dayNum} ${dayOfWeek}</span>
+            <div class="flex-1 h-3 rounded-md bg-gray-50 flex overflow-hidden border border-gray-100/50">
+              ${segmentsHTML}
+            </div>
+            <span class="w-12 text-right text-gray-500 font-semibold">${durationStr}</span>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+    function renderWeeklySubjectTimeline() {
+      const container = document.getElementById("weekly-subject-timeline-container");
+      if (!container) return;
+
+      const startOfWeek = Date.now() - (7 * 24 * 3600 * 1000);
+      const weeklySessions = state.sessions.filter(s => s.timestamp >= startOfWeek);
+
+      const durationsMap = {};
+      state.subjects.forEach(subj => {
+        durationsMap[subj.id] = {
+          name: subj.name,
+          color: subj.color,
+          seconds: 0
+        };
+      });
+
+      weeklySessions.forEach(s => {
+        if (durationsMap[String(s.subjectId)]) {
+          durationsMap[String(s.subjectId)].seconds += s.duration;
+        }
+      });
+
+      const sortedArray = Object.values(durationsMap).sort((a, b) => b.seconds - a.seconds);
+      const maxSeconds = Math.max(...sortedArray.map(item => item.seconds), 1);
+
+      let html = "";
+      sortedArray.forEach(item => {
+        const pct = Math.round((item.seconds / maxSeconds) * 100);
+        const h = Math.floor(item.seconds / 3600);
+        const m = Math.floor((item.seconds % 3600) / 60);
+        const displayDuration = `${h}h ${m}m`;
+
+        if (item.seconds > 0) {
+          html += `
+            <div class="space-y-1.5">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-bold text-gray-700">${item.name}</span>
+                <span class="text-gray-400 font-bold">${displayDuration}</span>
+              </div>
+              <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-500" 
+                     style="width: ${pct}%; background: linear-gradient(90deg, ${item.color}cc, ${item.color});">
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      container.innerHTML = html || `<p class="text-xs text-gray-400 text-center font-medium py-6">Focus logs will visualize as colorful timelines here.</p>`;
+    }
+
+    function renderHistoryTable() {
+      const getFormattedTime = (ts) => {
+        return new Date(ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+      };
+
+      const getDurationStr = (sec) => {
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = sec % 60;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      };
+
+      const historyBody = document.getElementById("history-table-body");
+      let html = "";
+      
+      const sorted = [...state.sessions].sort((a,b) => b.timestamp - a.timestamp);
+
+      sorted.forEach(s => {
+        const subj = state.subjects.find(sub => sub.id === String(s.subjectId));
+        const subjName = subj ? subj.name : "General Track";
+        const subjColor = subj ? subj.color : "#d1d5db";
+        const topic = s.topic || "General";
+
+        html += `
+          <tr class="hover:bg-slate-50/50 transition">
+            <td class="p-4 pl-6">
+              <span class="inline-flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: ${subjColor};"></span>
+                <span class="font-bold text-gray-800">${subjName}</span>
+              </span>
+            </td>
+            <td class="p-4 text-gray-500 font-medium">${topic}</td>
+            <td class="p-4 text-gray-400 font-medium">${getFormattedTime(s.timestamp)}</td>
+            <td class="p-4 text-gray-800 font-bold">${getDurationStr(s.duration)}</td>
+            <td class="p-4 text-right pr-6">
+              <button onclick="confirmDeleteSession('${s.id}')" class="text-red-400 hover:text-red-600 font-bold text-[10px] uppercase tracking-wider">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      if (sorted.length === 0) {
+        html = `<tr><td colspan="5" class="p-10 text-center text-gray-450 font-medium">No sessions logged yet. Get started today!</td></tr>`;
+      }
+
+      if (historyBody) historyBody.innerHTML = html;
+    }
+
+    async function confirmDeleteSession(id) {
+      showCustomConfirm("Delete Study Session", "Are you sure you want to permanently delete this logged session record? This action cannot be undone.", async () => {
+        showLoadingSpinner(true);
+        try {
+          const res = await fetch(`/api/sessions/${id}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error("Could not delete from DB.");
+          showToast("Study session record successfully wiped.", "success");
+          await syncStateFromServer();
+        } catch (err) {
+          showToast(err.message, "warning");
+        } finally {
+          showLoadingSpinner(false);
+        }
+      });
+    }
+
+    function renderGoalProgress() {
+      const startOfWeek = Date.now() - (7 * 24 * 3600 * 1000);
+      const weekSec = state.sessions
+        .filter(s => s.timestamp >= startOfWeek)
+        .reduce((sum, s) => sum + s.duration, 0);
+
+      const weekHrs = weekSec / 3600;
+      const targetGoal = state.user.weeklyGoal || 20;
+      const pct = Math.min(100, Math.round((weekHrs / targetGoal) * 100));
+
+      const h = Math.floor(weekSec / 3600);
+      const m = Math.floor((weekSec % 3600) / 60);
+
+      document.getElementById("goal-fraction-display").innerText = `${h}h ${m}m / ${targetGoal}h`;
+      document.getElementById("goal-progress-bar").style.width = `${pct}%`;
+      document.getElementById("goal-percentage-display").innerText = `${pct}% complete`;
+    }
+
+    function formatDateString(dateStr) {
+      if (!dateStr) return "";
+      const date = new Date(dateStr);
+      if (isNaN(date)) return dateStr;
+      const day = date.getDate();
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const month = monthNames[date.getMonth()];
+      const year = date.getFullYear();
+      return `${day} ${month}, ${year}`;
+    }
+
+    function updateTaskSummaryHeader() {
+      const totalTasks = state.tasks.length;
+      const highPriorityTasks = state.tasks.filter(t => t.priority === 'do-now').length;
+      
+      const todayString = getLocalTodayString();
+      const dueTodayTasks = state.tasks.filter(t => t.dueDate === todayString).length;
+
+      const elTotal = document.getElementById("header-total-tasks");
+      const elHigh = document.getElementById("header-high-tasks");
+      const elToday = document.getElementById("header-today-tasks");
+
+      if (elTotal) elTotal.innerText = totalTasks;
+      if (elHigh) elHigh.innerText = highPriorityTasks;
+      if (elToday) elToday.innerText = dueTodayTasks;
+    }
+
+    function getLocalTodayString() {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    // Today's Goal Checklist Rendering Logic
+    function renderTodaysGoals() {
+      const container = document.getElementById("today-goals-list-container");
+      const progressContainer = document.getElementById("today-goal-progress-container");
+      const progressBar = document.getElementById("today-goal-progress-bar");
+      const motivationLabel = document.getElementById("today-goal-motivation");
+      const percentLabel = document.getElementById("today-goal-percent");
+      const fractionLabel = document.getElementById("today-goal-fraction");
+
+      if (!container) return;
+
+      const todayStr = getLocalTodayString();
+      const todayTasks = state.tasks.filter(t => t.dueDate === todayStr);
+
+      if (todayTasks.length === 0) {
+        progressContainer.classList.add("hidden");
+        fractionLabel.innerText = "0 / 0";
+        container.innerHTML = `
+          <div class="flex flex-col items-center justify-center text-center p-4 py-8 bg-gray-50/50 rounded-2xl border border-dashed border-gray-150 h-full">
+            <span class="text-2xl mb-1.5">🎉</span>
+            <p class="text-[11px] font-bold text-gray-750">No tasks scheduled for today.</p>
+            <p class="text-[9px] text-gray-400 mt-0.5">Enjoy your day or create a new task.</p>
+            <button onclick="switchTab('tasks'); openAddTaskModal();" class="mt-3 px-3 py-1 bg-violet-600 hover:bg-violet-700 text-white text-[10px] font-bold rounded-lg transition-all shadow-sm">
+              + Add Task
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      progressContainer.classList.remove("hidden");
+      const completedCount = todayTasks.filter(t => t.completed).length;
+      const totalCount = todayTasks.length;
+      const pct = Math.round((completedCount / totalCount) * 100);
+
+      progressBar.style.width = `${pct}%`;
+      percentLabel.innerText = `${pct}%`;
+      fractionLabel.innerText = `${completedCount} / ${totalCount}`;
+
+      let motivationMsg = "Let's get started! 🚀";
+      if (pct === 100) motivationMsg = "Amazing! Today's goals completed 🎉";
+      else if (pct >= 75) motivationMsg = "Almost done! 🔥";
+      else if (pct >= 50) motivationMsg = "Halfway there! 🌟";
+      else if (pct >= 25) motivationMsg = "Good beginning! Keep going 💪";
+
+      motivationLabel.innerText = motivationMsg;
+
+      let html = "";
+      todayTasks.forEach(t => {
+        const subj = state.subjects.find(s => s.id === String(t.subjectId));
+        const subjName = subj ? subj.name : "General";
+        const subjColor = subj ? subj.color : "#94a3b8";
+
+        let priorityName = "Low";
+        let priorityBadgeClass = "bg-blue-50 text-blue-500 border-blue-100";
+        
+        if (t.priority === "do-now") {
+          priorityName = "High";
+          priorityBadgeClass = "bg-rose-50 text-rose-500 border-rose-100";
+        } else if (t.priority === "do-later") {
+          priorityName = "High";
+          priorityBadgeClass = "bg-orange-50 text-orange-500 border-orange-100";
+        } else if (t.priority === "schedule") {
+          priorityName = "Medium";
+          priorityBadgeClass = "bg-emerald-50 text-emerald-500 border-emerald-100";
+        }
+
+        html += `
+          <div class="flex items-center space-x-2.5 p-2.5 rounded-xl bg-gray-50/40 border border-gray-100/50 hover:bg-gray-50 transition duration-150">
+            <button onclick="toggleTaskCompletion('${t.id}')" class="w-4.5 h-4.5 flex-shrink-0 flex items-center justify-center rounded-md border border-slate-300 hover:border-violet-500 transition-all ${t.completed ? 'bg-violet-600 border-violet-600 text-white' : 'text-transparent bg-white'}">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7"></path></svg>
+            </button>
+            <div class="overflow-hidden flex-1 leading-tight">
+              <p class="text-[11px] font-bold text-gray-800 truncate ${t.completed ? 'line-through text-gray-400' : ''}">${t.text}</p>
+              <div class="flex items-center space-x-1.5 text-[9px] text-gray-450 mt-1 font-semibold">
+                <span class="inline-flex items-center space-x-1">
+                  <span class="w-1.5 h-1.5 rounded-full inline-block animate-pulse" style="background-color: ${subjColor};"></span>
+                  <span>${subjName}</span>
+                </span>
+                <span>•</span>
+                <span class="px-1 py-0.2 rounded border text-[8px] font-bold uppercase tracking-wide ${priorityBadgeClass}">${priorityName}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function renderTasks() {
+      const container = document.getElementById("tasks-list-container");
+      if (!container) return;
+
+      let filtered = [...state.tasks];
+
+      const subjFilterVal = document.getElementById("task-filter-subject-select").value;
+      if (subjFilterVal) {
+        filtered = filtered.filter(t => String(t.subjectId) === subjFilterVal);
+      }
+
+      const statusFilterVal = document.getElementById("task-filter-status-select").value;
+      if (statusFilterVal) {
+        if (statusFilterVal === "Completed") {
+          filtered = filtered.filter(t => t.completed || t.status === "Completed");
+        } else {
+          filtered = filtered.filter(t => !t.completed && t.status === statusFilterVal);
+        }
+      }
+
+      const sortBy = document.getElementById("task-sort-select").value;
+      if (sortBy === "priority") {
+        const priorityOrder = { "do-now": 1, "do-later": 2, "schedule": 3, "low": 4 };
+        filtered.sort((a, b) => (priorityOrder[a.priority] || 9) - (priorityOrder[b.priority] || 9));
+      } else if (sortBy === "due-date") {
+        filtered.sort((a, b) => {
+          const dA = new Date(a.dueDate || "9999-12-31");
+          const dB = new Date(b.dueDate || "9999-12-31");
+          return dA - dB;
+        });
+      }
+
+      let html = "";
+      filtered.forEach(t => {
+        const subj = state.subjects.find(s => s.id === String(t.subjectId));
+        const subjName = subj ? subj.name : "General";
+        const subjColor = subj ? subj.color : "#94a3b8";
+
+        let dotsHTML = "";
+        let priorityLabel = "";
+
+        if (t.priority === "do-now") {
+          dotsHTML = `<span class="text-rose-500 mr-1.5 font-black tracking-tight">●●●</span>`;
+          priorityLabel = "Do Now";
+        } else if (t.priority === "do-later") {
+          dotsHTML = `<span class="text-orange-500 mr-1.5 font-black tracking-tight">●●●</span>`;
+          priorityLabel = "Do Later";
+        } else if (t.priority === "schedule") {
+          dotsHTML = `<span class="text-emerald-500 mr-1.5 font-black tracking-tight">●●●</span>`;
+          priorityLabel = "Schedule";
+        } else {
+          dotsHTML = `<span class="text-blue-400 mr-1.5 font-black tracking-tight">●●</span>`;
+          priorityLabel = "Low Priority";
+        }
+
+        const formattedDate = t.dueDate ? formatDateString(t.dueDate) : "No Due Date";
+        const durationStr = t.duration || "45m";
+        const statusVal = t.completed ? "Completed" : (t.status || "Not Started");
+
+        let statusBadgeClass = "bg-gray-100 text-gray-500";
+        if (statusVal === "Completed") statusBadgeClass = "bg-emerald-50 text-emerald-600 border border-emerald-100";
+        else if (statusVal === "In Progress") statusBadgeClass = "bg-amber-50 text-amber-600 border border-amber-100";
+
+        html += `
+          <div class="custom-card rounded-[20px] bg-white border-l-[6px] flex items-center justify-between p-5 mb-3.5 shadow-sm hover:shadow-md transition duration-200" style="border-left-color: ${subjColor};">
+            <div class="flex items-center space-x-4 overflow-hidden flex-1">
+              
+              <div class="text-gray-300 flex-shrink-0 cursor-grab active:cursor-grabbing">
+                <svg class="w-4 h-6" fill="currentColor" viewBox="0 0 16 24">
+                  <circle cx="4" cy="4" r="1.5"/>
+                  <circle cx="12" cy="4" r="1.5"/>
+                  <circle cx="4" cy="12" r="1.5"/>
+                  <circle cx="12" cy="12" r="1.5"/>
+                  <circle cx="4" cy="20" r="1.5"/>
+                  <circle cx="12" cy="20" r="1.5"/>
+                </svg>
+              </div>
+
+              <button onclick="toggleTaskCompletion('${t.id}')" class="w-6 h-6 flex-shrink-0 flex items-center justify-center rounded-lg border-2 border-slate-200 hover:border-violet-400 transition-all ${t.completed ? 'bg-violet-600 border-violet-600 text-white' : 'text-transparent bg-white'}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+              </button>
+
+              <div class="overflow-hidden pr-4 flex-1">
+                <p class="text-[15px] font-bold text-gray-900 truncate ${t.completed ? 'line-through text-gray-400' : ''}">${t.text}</p>
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-400 mt-2 font-medium">
+                  <span class="inline-flex items-center space-x-1.5">
+                    <span class="w-2 h-2 rounded-full inline-block" style="background-color: ${subjColor};"></span>
+                    <span class="text-gray-500 font-semibold">${subjName}</span>
+                  </span>
+                  <span class="text-gray-300">|</span>
+                  <span class="inline-flex items-center space-x-1 text-gray-500">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span>${formattedDate}</span>
+                  </span>
+                  <span class="text-gray-300">|</span>
+                  <span class="inline-flex items-center space-x-1 text-gray-500">
+                    <span>⏱️</span>
+                    <span>${durationStr}</span>
+                  </span>
+                  <span class="text-gray-300">|</span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${statusBadgeClass}">${statusVal}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-6 flex-shrink-0">
+              <div class="flex items-center text-xs font-semibold text-gray-500">
+                ${dotsHTML}
+                <span class="text-[11px] font-semibold text-gray-500 ml-1">${priorityLabel}</span>
+              </div>
+
+              <div class="relative group">
+                <button class="p-1 hover:bg-gray-100 rounded-lg text-gray-400 transition">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 10a2 2 0 11-2 2 2 2 0 012-2zm0-6a2 2 0 11-2 2 2 2 0 012-2zm0 12a2 2 0 11-2 2 2 2 0 012-2z"/>
+                  </svg>
+                </button>
+                <div class="absolute right-0 top-7 w-28 bg-white rounded-xl border border-gray-100 shadow-lg py-1 hidden group-hover:block z-20">
+                  <button onclick="editTask('${t.id}')" class="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-violet-50 hover:text-violet-600 font-semibold">Edit Task</button>
+                  <button onclick="confirmDeleteTask('${t.id}')" class="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 font-semibold">Delete</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      if (filtered.length === 0) {
+        html = `<div class="p-12 text-center text-gray-400 font-medium bg-white rounded-3xl border border-gray-100 shadow-soft">No active targets found matching selected prioritization filter criteria.</div>`;
+      }
+
+      container.innerHTML = html;
+      updateTaskSummaryHeader();
+    }
+
+    async function editTask(id) {
+      const t = state.tasks.find(tk => tk.id === id);
+      if (!t) return;
+      const newText = prompt("Update task objective description:", t.text);
+      if (newText === null) return;
+      if (newText.trim() === "") {
+        showToast("The task description text cannot remain empty.", "warning");
+        return;
+      }
+      
+      showLoadingSpinner(true);
+      try {
+        const response = await fetch(`/api/tasks/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: newText.trim() })
+        });
+        if (!response.ok) throw new Error("Could not update task on DB.");
+        showToast("Task description updated.", "success");
+        await syncStateFromServer();
+      } catch (err) {
+        showToast(err.message, "warning");
+      } finally {
+        showLoadingSpinner(false);
+      }
+    }
+
+    async function toggleTaskCompletion(id) {
+      const t = state.tasks.find(tk => tk.id === id);
+      if (!t) return;
+      const nextCompleted = !t.completed;
+      const nextStatus = nextCompleted ? "Completed" : "In Progress";
+
+      showLoadingSpinner(true);
+      try {
+        const response = await fetch(`/api/tasks/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ completed: nextCompleted, status: nextStatus })
+        });
+        if (!response.ok) throw new Error();
+        
+        showToast(nextCompleted ? "Task checked off!" : "Task marked in progress", "success");
+        await syncStateFromServer();
+      } catch (err) {
+        showToast("Could not synchronize task progress.", "warning");
+      } finally {
+        showLoadingSpinner(false);
+      }
+    }
+
+    async function confirmDeleteTask(id) {
+      showCustomConfirm("Delete Task", "Are you sure you want to permanently delete this task objective from your tracking list?", async () => {
+        showLoadingSpinner(true);
+        try {
+          const res = await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error();
+          showToast("Task deleted from timeline.", "success");
+          await syncStateFromServer();
+        } catch (err) {
+          showToast("Failed to delete task.", "warning");
+        } finally {
+          showLoadingSpinner(false);
+        }
+      });
+    }
+
+    function renderSubjectList() {
+      const grid = document.getElementById("subject-cards-grid");
+      let html = "";
+
+      state.subjects.forEach(s => {
+        let topicTags = "";
+        if (s.topics) {
+          s.topics.forEach(t => {
+            topicTags += `<span class="px-2 py-1 bg-gray-50 text-gray-500 rounded-lg text-[10px] font-bold mr-1.5 mb-1.5 inline-block border border-gray-100">${t}</span>`;
+          });
+        }
+
+        const totalDurationForSubj = state.sessions
+          .filter(sess => String(sess.subjectId) === s.id)
+          .reduce((sum, sess) => sum + sess.duration, 0);
+
+        const hoursLogged = Math.round((totalDurationForSubj / 3600) * 10) / 10;
+
+        html += `
+          <div class="custom-card rounded-3xl p-6 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-start">
+                <span class="inline-flex items-center space-x-2">
+                  <span class="w-3 h-3 rounded-full inline-block" style="background-color: ${s.color};"></span>
+                  <h4 class="text-sm font-bold text-gray-900">${s.name}</h4>
+                </span>
+                <span class="text-[10px] font-bold text-violet-600 bg-violet-50 px-2.5 py-1 rounded-full">${hoursLogged}h studied</span>
+              </div>
+              <div class="mt-4">
+                <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">Detailed Topics Included</p>
+                <div class="flex flex-wrap">
+                  ${topicTags || '<span class="text-xs text-gray-400 italic">No custom sub-topics created. Click subject edit.</span>'}
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-50 pt-4 mt-6 flex justify-between items-center">
+              <button onclick="confirmDeleteSubject('${s.id}')" class="text-xs font-semibold text-red-450 hover:text-red-650 transition">Delete Subject</button>
+              <button onclick="switchTab('tasks')" class="text-xs font-semibold text-violet-600 hover:text-violet-750 transition">Manage Tasks</button>
+            </div>
+          </div>
+        `;
+      });
+
+      if (state.subjects.length === 0) {
+        html = `
+          <div class="md:col-span-2 text-center p-12 custom-card rounded-3xl bg-white border border-dashed border-gray-200">
+            <span class="text-3xl block mb-2">📚</span>
+            <p class="text-gray-500 font-bold text-sm">No subjects defined yet</p>
+            <p class="text-xs text-gray-400 mt-1 max-w-xs mx-auto">Create customized study boundaries like Mathematics, Chemistry or History to structure your analytics dashboard.</p>
+            <button onclick="openSubjectModal()" class="mt-4 px-4 py-2 bg-violet-600 text-white font-bold text-xs rounded-xl hover:bg-violet-750 transition">Create First Subject</button>
+          </div>
+        `;
+      }
+
+      if (grid) grid.innerHTML = html;
+    }
+
+    async function confirmDeleteSubject(id) {
+      const s = state.subjects.find(sub => sub.id === id);
+      const sName = s ? s.name : "Subject";
+      showCustomConfirm("Delete Subject", `Are you sure you want to delete "${sName}"? This will permanently wipe all associated history logs and task items too.`, async () => {
+        showLoadingSpinner(true);
+        try {
+          const res = await fetch(`/api/subjects/${id}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error("Could not delete subject on DB.");
+          showToast(`Subject "${sName}" and all related files deleted successfully.`, "info");
+          await syncStateFromServer();
+        } catch (err) {
+          showToast(err.message, "warning");
+        } finally {
+          showLoadingSpinner(false);
+        }
+      });
+    }
+
+    // ================== AUDIO NOTIFICATION GENERATOR ==================
+    function playNotificationSound() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const playTone = (frequency, startTime, duration) => {
+          const osc = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+          
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(frequency, startTime);
+          
+          gainNode.gain.setValueAtTime(0.2, startTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+          
+          osc.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          
+          osc.start(startTime);
+          osc.stop(startTime + duration);
+        };
+
+        const now = audioCtx.currentTime;
+        playTone(523.25, now, 0.15); // Note C5
+        playTone(659.25, now + 0.15, 0.15); // Note E5
+        playTone(783.99, now + 0.30, 0.30); // Note G5
+      } catch (err) {
+        console.warn("Audio feedback context blocked by browser gesture permissions.", err);
+      }
+    }
+
+    // ================== LIVE STUDY TIMER CORE CONTROLLER ==================
+    function setTimerMode(mode) {
+      if (timerRunning) {
+        showCustomConfirm("Change Timer Mode", "Changing active tracking parameters will cancel your current study run. Do you wish to continue?", () => {
+          clearInterval(timerInterval);
+          timerRunning = false;
+          document.getElementById("btn-timer-icon-svg").innerText = "▶";
+          document.getElementById("btn-timer-text").innerText = "Start";
+          applyTimerMode(mode);
+        });
+      } else {
+        applyTimerMode(mode);
+      }
+    }
+
+    function applyTimerMode(mode) {
+      timerMode = mode;
+      pomoPhase = 'focus';
+      timerSecondsElapsed = 0;
+
+      const btnNormal = document.getElementById("btn-mode-normal");
+      const btnPomo = document.getElementById("btn-mode-pomo");
+      const pomoInputs = document.getElementById("pomo-settings-container");
+      const statusLabel = document.getElementById("timer-status-label");
+      const timerEmoji = document.getElementById("timer-emoji");
+
+      if (mode === 'pomodoro') {
+        btnPomo.className = "flex-1 py-1.5 text-xs font-bold rounded-xl bg-violet-600 text-white shadow-sm transition";
+        btnNormal.className = "flex-1 py-1.5 text-xs font-medium text-gray-400 hover:text-gray-600 transition";
+        pomoInputs.classList.remove("hidden");
+        statusLabel.innerText = "Focus Phase 🍅";
+        timerEmoji.innerText = "🍅";
+        
+        const focusMin = parseInt(document.getElementById("pomo-focus-input").value) || 25;
+        timerSecondsRemaining = focusMin * 60;
+      } else {
+        btnNormal.className = "flex-1 py-1.5 text-xs font-bold rounded-xl bg-violet-600 text-white shadow-sm transition";
+        btnPomo.className = "flex-1 py-1.5 text-xs font-medium text-gray-400 hover:text-gray-600 transition";
+        pomoInputs.classList.add("hidden");
+        statusLabel.innerText = "Focus Time";
+        timerEmoji.innerText = "⏰";
+      }
+      updateTimerDisplay();
+    }
+
+    function toggleTimer() {
+      const subjSelect = document.getElementById("timer-subject-select");
+      if (!subjSelect.value) {
+        showToast("Please choose a target subject first to start logging study metrics.", "warning");
+        return;
+      }
+
+      activeSubjectId = subjSelect.value;
+      activeTopicName = document.getElementById("timer-topic-select").value;
+
+      if (timerRunning) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        document.getElementById("btn-timer-icon-svg").innerText = "▶";
+        document.getElementById("btn-timer-text").innerText = "Start";
+        showToast("Study timer paused.", "info");
+      } else {
+        timerRunning = true;
+        document.getElementById("btn-timer-icon-svg").innerText = "⏸";
+        document.getElementById("btn-timer-text").innerText = "Pause";
+        showToast("Focus countdown initiated!", "success");
+        
+        timerInterval = setInterval(() => {
+          if (timerMode === 'normal') {
+            timerSecondsElapsed++;
+          } else {
+            // Pomodoro Mode Core Execution logic
+            if (timerSecondsRemaining > 0) {
+              timerSecondsRemaining--;
+            } else {
+              playNotificationSound();
+              
+              const focusMin = parseInt(document.getElementById("pomo-focus-input").value) || 25;
+              const breakMin = parseInt(document.getElementById("pomo-break-input").value) || 5;
+
+              if (pomoPhase === 'focus') {
+                saveSessionDirectly({
+                  subjectId: activeSubjectId,
+                  topic: activeTopicName || "Pomodoro Focus",
+                  duration: focusMin * 60
+                });
+
+                // Switch to Break
+                pomoPhase = 'break';
+                timerSecondsRemaining = breakMin * 60;
+                document.getElementById("timer-status-label").innerText = "Break Phase ☕";
+                document.getElementById("timer-emoji").innerText = "☕";
+                showToast("Great job! Focus block successfully recorded. Take a break!", "success");
+              } else {
+                // Switch to Focus
+                pomoPhase = 'focus';
+                timerSecondsRemaining = focusMin * 60;
+                document.getElementById("timer-status-label").innerText = "Focus Phase 🍅";
+                document.getElementById("timer-emoji").innerText = "🍅";
+                showToast("Break interval ended. Time to focus!", "info");
+              }
+            }
+          }
+          updateTimerDisplay();
+        }, 1000);
+      }
+    }
+
+    async function saveSessionDirectly(sessionData) {
+      try {
+        const res = await fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(sessionData)
+        });
+        if (!res.ok) throw new Error("Could not automatically record Session block.");
+        await syncStateFromServer();
+      } catch (err) {
+        showToast(err.message, "warning");
+      }
+    }
+
+    function resetTimer() {
+      showCustomConfirm("Reset Active Timer", "Are you sure you want to discard this focus session? Unlogged study minutes will be lost.", () => {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        timerSecondsElapsed = 0;
+        
+        if (timerMode === 'pomodoro') {
+          pomoPhase = 'focus';
+          const focusMin = parseInt(document.getElementById("pomo-focus-input").value) || 25;
+          timerSecondsRemaining = focusMin * 60;
+          document.getElementById("timer-status-label").innerText = "Focus Phase 🍅";
+          document.getElementById("timer-emoji").innerText = "🍅";
+        } else {
+          document.getElementById("timer-status-label").innerText = "Focus Time";
+          document.getElementById("timer-emoji").innerText = "⏰";
+        }
+        
+        updateTimerDisplay();
+        document.getElementById("btn-timer-icon-svg").innerText = "▶";
+        document.getElementById("btn-timer-text").innerText = "Start";
+        showToast("Timer cleared.", "info");
+      });
+    }
+
+    function updateTimerDisplay() {
+      let displaySeconds = (timerMode === 'normal') ? timerSecondsElapsed : timerSecondsRemaining;
+      
+      const h = Math.floor(displaySeconds / 3600);
+      const m = Math.floor((displaySeconds % 3600) / 60);
+      const s = displaySeconds % 60;
+      document.getElementById("timer-time-display").innerText = 
+        `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    async function stopAndSaveTimer() {
+      if (timerMode === 'normal') {
+        if (timerSecondsElapsed < 5) {
+          showToast("Focus sessions must be at least 5 seconds long to register safely.", "warning");
+          return;
+        }
+
+        clearInterval(timerInterval);
+        timerRunning = false;
+
+        showLoadingSpinner(true);
+        try {
+          const res = await fetch('/api/sessions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              subjectId: activeSubjectId,
+              topic: activeTopicName || "General Focus",
+              duration: timerSecondsElapsed
+            })
+          });
+          if (!res.ok) throw new Error("Could not log session.");
+          
+          timerSecondsElapsed = 0;
+          updateTimerDisplay();
+          document.getElementById("btn-timer-icon-svg").innerText = "▶";
+          document.getElementById("btn-timer-text").innerText = "Start";
+
+          showToast("Focus session successfully recorded.", "success");
+          await syncStateFromServer();
+        } catch (err) {
+          showToast(err.message, "warning");
+        } finally {
+          showLoadingSpinner(false);
+        }
+      } else {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        document.getElementById("btn-timer-icon-svg").innerText = "▶";
+        document.getElementById("btn-timer-text").innerText = "Start";
+        showToast("Pomodoro timer paused.", "info");
+      }
+    }
+
+
+    // ================== TAB NAVIGATION SWITCHER ==================
+    function switchTab(tabId) {
+      const tabs = ["dashboard", "subjects", "tasks", "analytics", "history"];
+      
+      tabs.forEach(t => {
+        const dom = document.getElementById(`tab-${t}`);
+        const nav = document.getElementById(`nav-${t}`);
+        
+        if (dom) {
+          if (t === tabId) {
+            dom.classList.remove("hidden");
+            if (nav) nav.classList.add("tab-active");
+          } else {
+            dom.classList.add("hidden");
+            if (nav) nav.classList.remove("tab-active");
+          }
+        }
+      });
+
+      if (tabId === 'dashboard' || tabId === 'analytics') {
+        setTimeout(renderCharts, 50);
+      }
+
+      // Automatically trigger contextual tutorials on first visit (Guarded against continuous walkthrough transitions)
+      if (tabId === 'subjects' && !subjectsTutorialShown && tutorialMode !== "replay" && tutorialMode !== "onboarding") {
+        triggerContextualTutorial("context-subjects");
+      } else if (tabId === 'tasks' && !tasksTutorialShown && tutorialMode !== "replay" && tutorialMode !== "onboarding") {
+        triggerContextualTutorial("context-tasks");
+      }
+    }
+
+
+    // ================== MODAL INTERACTIVE CLOSURES ==================
+    function openManualLogModal() {
+      if (state.subjects.length === 0) {
+        showToast("Please create at least one subject under the 'Subjects' panel before manually logging sessions.", "warning");
+        return;
+      }
+      document.getElementById("manual-date").valueAsDate = new Date();
+      document.getElementById("manual-hours").value = "1";
+      document.getElementById("manual-minutes").value = "0";
+      document.getElementById("manual-seconds").value = "0";
+      
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      document.getElementById("manual-time").value = timeStr;
+
+      document.getElementById("modal-manual-log").classList.remove("hidden");
+    }
+
+    function closeManualLogModal() {
+      document.getElementById("modal-manual-log").classList.add("hidden");
+    }
+
+    async function submitManualLog() {
+      const subjectId = document.getElementById("manual-subject").value;
+      const topicName = document.getElementById("manual-topic").value;
+      const dateStr = document.getElementById("manual-date").value;
+      const timeStr = document.getElementById("manual-time").value;
+
+      const hrs = parseInt(document.getElementById("manual-hours").value) || 0;
+      const mins = parseInt(document.getElementById("manual-minutes").value) || 0;
+      const secs = parseInt(document.getElementById("manual-seconds").value) || 0;
+
+      if (!subjectId) {
+        showToast("Please specify a Subject for manual records.", "warning");
+        return;
+      }
+
+      const totalSec = (hrs * 3600) + (mins * 60) + secs;
+      if (totalSec <= 0) {
+        showToast("Please specify a valid focus session duration.", "warning");
+        return;
+      }
+
+      let timestamp = Date.now();
+      if (dateStr && timeStr) {
+        timestamp = Date.parse(`${dateStr}T${timeStr}`);
+      }
+
+      showLoadingSpinner(true);
+      try {
+        const response = await fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subjectId,
+            topic: topicName || "General Study",
+            timestamp,
+            duration: totalSec
+          })
+        });
+        if (!response.ok) throw new Error("Could not log manual session.");
+        
+        showToast("Manual session logged successfully.", "success");
+        closeManualLogModal();
+        await syncStateFromServer();
+      } catch (err) {
+        showToast(err.message, "warning");
+      } finally {
+        showLoadingSpinner(false);
+      }
+    }
+
+    function openSubjectModal() {
+      document.getElementById("subj-input-name").value = "";
+      document.getElementById("subj-input-topics").value = "";
+      document.getElementById("modal-subject").classList.remove("hidden");
+    }
+
+    function closeSubjectModal() {
+      document.getElementById("modal-subject").classList.add("hidden");
+    }
+
+    function setSubjAccent(colorHex, btnRef) {
+      activeSubjAccentSelected = colorHex;
+      document.querySelectorAll(".subj-color-bubble").forEach(b => {
+        b.classList.remove("ring-2", "ring-violet-500");
+      });
+      if (btnRef) {
+        btnRef.classList.add("ring-2", "ring-violet-500");
+      }
+    }
+
+    async function submitSubject() {
+      const name = document.getElementById("subj-input-name").value.trim();
+      const rawTopics = document.getElementById("subj-input-topics").value;
+
+      if (!name) {
+        showToast("Please specify a valid name for your study subject.", "warning");
+        return;
+      }
+
+      const parsedTopics = rawTopics ? rawTopics.split(",").map(t => t.trim()).filter(Boolean) : [];
+
+      showLoadingSpinner(true);
+      try {
+        const response = await fetch('/api/subjects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            color: activeSubjAccentSelected,
+            topics: parsedTopics
+          })
+        });
+        if (!response.ok) throw new Error("Database error creating subject.");
+        
+        showToast(`Subject "${name}" created successfully.`, "success");
+        closeSubjectModal();
+        await syncStateFromServer();
+      } catch (err) {
+        showToast(err.message, "warning");
+      } finally {
+        showLoadingSpinner(false);
+      }
+    }
+
+    function openAddTaskModal() {
+      if (state.subjects.length === 0) {
+        showToast("Create a subject first before tracking detailed assignments.", "warning");
+        return;
+      }
+      document.getElementById("task-input-desc").value = "";
+      document.getElementById("task-input-duedate").value = "";
+      document.getElementById("task-input-duration").value = "";
+      document.getElementById("modal-task").classList.remove("hidden");
+    }
+
+    function closeAddTaskModal() {
+      document.getElementById("modal-task").classList.add("hidden");
+    }
+
+    async function submitTask() {
+      const desc = document.getElementById("task-input-desc").value.trim();
+      const subjId = document.getElementById("task-input-subject").value;
+      const priority = document.getElementById("task-input-priority").value;
+      const dueDate = document.getElementById("task-input-duedate").value;
+      const duration = document.getElementById("task-input-duration").value.trim() || "45m";
+      const status = document.getElementById("task-input-status").value;
+
+      if (!desc) {
+        showToast("Please write a task description.", "warning");
+        return;
+      }
+
+      showLoadingSpinner(true);
+      try {
+        const response = await fetch('/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: desc,
+            subjectId: subjId || null,
+            priority,
+            completed: status === "Completed",
+            status,
+            dueDate,
+            duration
+          })
+        });
+        if (!response.ok) throw new Error("Could not insert task into database.");
+        
+        showToast("Assignment added to taskboard.", "success");
+        closeAddTaskModal();
+        await syncStateFromServer();
+      } catch (err) {
+        showToast(err.message, "warning");
+      } finally {
+        showLoadingSpinner(false);
+      }
+    }
+
+    async function wipeDataRestoreDefaults() {
+      showCustomConfirm("Wipe Database", "This is a destructive action. Are you sure you want to permanently delete all subjects, tasks, and history from the database?", async () => {
+        showLoadingSpinner(true);
+        try {
+          const res = await fetch('/api/reset', { method: 'POST' });
+          if (!res.ok) throw new Error("Failed to reset database on cloud server.");
+          
+          localStorage.clear();
+          subjectsTutorialShown = false;
+          tasksTutorialShown = false;
+
+          showToast("Database successfully wiped.", "info");
+          
+          // Reload the application to automatically query state and trigger the onboarding wizard
+          window.location.reload();
+        } catch (err) {
+          showToast(err.message, "warning");
+          showLoadingSpinner(false);
+        }
+      });
+    }
+
+    // Initialize application state synchronization on startup with DOM readiness check
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      syncStateFromServer();
+    } else {
+      window.addEventListener('DOMContentLoaded', syncStateFromServer);
+    }
+
+  </script>
+</body>
+</html>
